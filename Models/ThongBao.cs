@@ -5,21 +5,25 @@ namespace QLDuAn.Models;
 
 public partial class ThongBao
 {
-    public string MaThongBao { get; set; } = null!;
+    public int MaThongBao { get; set; }
 
     public string TieuDe { get; set; } = null!;
 
     public string NoiDung { get; set; } = null!;
 
-    public string? MaNguoiGui { get; set; }
+    public DateTime? NgayTao { get; set; }
 
-    public string MaNguoiNhan { get; set; } = null!;
+    public int MaNguoiDung { get; set; }
 
-    public DateTime? NgayGui { get; set; }
+    public int? MaDuAn { get; set; }
+
+    public int? MaCongViec { get; set; }
 
     public bool? DaDoc { get; set; }
 
-    public virtual NguoiDung? MaNguoiGuiNavigation { get; set; }
+    public virtual CongViec? MaCongViecNavigation { get; set; }
 
-    public virtual NguoiDung MaNguoiNhanNavigation { get; set; } = null!;
+    public virtual DuAn? MaDuAnNavigation { get; set; }
+
+    public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 }

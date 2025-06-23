@@ -1,0 +1,69 @@
+﻿@{
+    ViewData["Title"] = "Tạo tài liệu mới";
+}
+
+<h2>Tạo tài liệu mới</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label for="file" class="control-label">Chọn file</label>
+        <input type="file" name="file" class="form-control" />
+        <span class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="maDuAn" class="control-label">Dự án (tùy chọn)</label>
+        <select name="maDuAn" class="form-control" asp-items="ViewBag.DuAnList">
+            <option value="">-- Không gắn dự án --</option>
+        </select>
+        <span class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="maCongViec" class="control-label">Công việc (tùy chọn)</label>
+        <select name="maCongViec" class="form-control" asp-items="ViewBag.CongViecList">
+            <option value="">-- Không gắn công việc --</option>
+        </select>
+        <span class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Phân quyền truy cập</label>
+        <div id="phanQuyenContainer">
+            <div class="phan-quyen-row mb-2">
+                <select name="vaiTroIds" class="form-control d-inline-block w-50" asp-items="ViewBag.VaiTroList">
+                    <option value="">-- Chọn vai trò --</option>
+                </select>
+                <select name="quyenTruyCaps" class="form-control d-inline-block w-25">
+                    <option value="Xem">Xem</option>
+                    <option value="Tải">Tải</option>
+                    <option value="Sửa">Sửa</option>
+                    <option value="Xóa">Xóa</option>
+                </select>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addPhanQuyenRow()">Thêm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Tạo" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function addPhanQuyenRow() {
+            var container = document.getElementById('phanQuyenContainer');
+            var newRow = container.querySelector('.phan-quyen-row').cloneNode(true);
+            newRow.querySelector('select[name="vaiTroIds"]').value = '';
+            newRow.querySelector('select[name="quyenTruyCaps"]').value = 'Xem';
+            container.appendChild(newRow);
+        }
+    </script>
+}

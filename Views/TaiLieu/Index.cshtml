@@ -1,0 +1,59 @@
+﻿@model IEnumerable<QLDuAn.Models.TaiLieu>
+
+@{
+    ViewData["Title"] = "Danh sách tài liệu";
+}
+
+<h2>Danh sách tài liệu</h2>
+
+
+<div class="mb-3">
+    <form asp-action="Index" method="get">
+        <div class="form-group">
+            <label for="maDuAn">Lọc theo dự án:</label>
+            <select id="maDuAn" name="maDuAn" class="form-control d-inline-block w-auto" onchange="this.form.submit()">
+                <option value="" selected="@(string.IsNullOrEmpty(Context.Request.Query["maDuAn"]) ? "selected" : null)">-- Tất cả dự án --</option>
+                @foreach (var item in ViewBag.DuAnList as SelectList)
+                {
+                    <option value="@item.Value" selected="@(item.Value == Context.Request.Query["maDuAn"].ToString() ? "selected" : null)">@item.Text</option>
+                }
+            </select>
+        </div>
+    </form>
+</div>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Tạo tài liệu mới</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tên tài liệu</th>
+            <th>Dự án</th>
+            <th>Công việc</th>
+            <th>Người upload</th>
+            <th>Ngày upload</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.TenTaiLieu)</td>
+                <td>@(item.MaDuAnNavigation != null ? item.MaDuAnNavigation.TenDuAn : "Không gắn dự án")</td>
+                <td>@(item.MaCongViecNavigation != null ? item.MaCongViecNavigation.TenCongViec : "Không gắn công việc")</td>
+                <td>@Html.DisplayFor(modelItem => item.NguoiUploadNavigation.HoTen)</td>
+                <td>@Html.DisplayFor(modelItem => item.NgayUpload)</td>
+                <td>
+                    <a asp-action="Download" asp-route-id="@item.MaTaiLieu" class="btn btn-success btn-sm">Tải xuống</a>
+                    <a asp-action="Edit" asp-route-id="@item.MaTaiLieu" class="btn btn-warning btn-sm">Sửa</a>
+                    <form asp-action="Delete" asp-route-id="@item.MaTaiLieu" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa tài liệu này?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

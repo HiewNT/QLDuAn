@@ -1,0 +1,134 @@
+﻿.list-group-item-action:hover {
+    background-color: #f8f9fa;
+    border-left: 3px solid #0d6efd;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.dropdown-item:hover i {
+    transform: translateX(2px);
+    transition: transform 0.2s ease;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+/* Notification Styles */
+.notification-dropdown {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    width: 280px;
+}
+
+.notification-item {
+    border: none;
+    transition: background-color 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .notification-item.unread {
+        background-color: #b3e5fc; /* Màu xanh đậm hơn để nổi bật */
+        border-left: 3px solid #0288d1; /* Viền xanh đậm hơn */
+    }
+
+        .notification-item.unread:hover {
+            background-color: #81d4fa; /* Màu sáng hơn khi hover */
+        }
+
+.notification-icon {
+    min-width: 24px;
+    min-height: 24px;
+}
+
+.dropdown-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.dropdown-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+/* Bell animation */
+@keyframes bellShake {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(5deg);
+    }
+
+    50% {
+        transform: rotate(0deg);
+    }
+
+    75% {
+        transform: rotate(-5deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.nav-link:hover .bi-bell {
+    animation: bellShake 0.5s ease-in-out;
+}
+
+/* Badge pulse effect */
+.badge {
+    animation: pulse 2s infinite;
+    font-size: 0.75rem;
+    padding: 0.25em 0.4em;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Custom scrollbar for notifications */
+.notification-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.notification-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.notification-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+    .notification-container::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }

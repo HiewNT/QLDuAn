@@ -1,0 +1,45 @@
+﻿@model IEnumerable<QLDuAn.Models.ToChuyenMon>
+
+@{
+    ViewData["Title"] = "Danh sách tổ chuyên môn";
+}
+
+<h2>Danh sách tổ chuyên môn</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Tạo tổ mới</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tên tổ</th>
+            <th>Số nhân sự</th>
+            <th>Tổng công việc</th>
+            <th>Hoàn thành</th>
+            <th>Trễ hạn</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var workload = ViewBag.Workload[item.MaTo];
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.TenTo)</td>
+                <td>@workload.Members</td>
+                <td>@workload.TotalTasks</td>
+                <td>@workload.CompletedTasks</td>
+                <td>@workload.OverdueTasks</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.MaTo" class="btn btn-primary btn-sm">Chi tiết</a>
+                    <a asp-action="Edit" asp-route-id="@item.MaTo" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-action="AssignMembers" asp-route-id="@item.MaTo" class="btn btn-info btn-sm">Gán nhân sự</a>
+                    <form asp-action="Delete" asp-route-id="@item.MaTo" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa tổ này?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

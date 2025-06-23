@@ -5,33 +5,27 @@ namespace QLDuAn.Models;
 
 public partial class DuAn
 {
-    public string MaDuAn { get; set; } = null!;
+    public int MaDuAn { get; set; }
 
     public string TenDuAn { get; set; } = null!;
 
     public string? MoTa { get; set; }
 
-    public DateTime? NgayBatDau { get; set; }
+    public string TrangThai { get; set; } = null!;
 
-    public DateTime? NgayKetThuc { get; set; }
+    public int NguoiPhuTrach { get; set; }
 
-    public string MaTrangThai { get; set; } = null!;
+    public DateOnly? NgayBatDau { get; set; }
 
-    public string MaNguoiPhuTrach { get; set; } = null!;
-
-    public string? GhiChu { get; set; }
-
-    public DateTime? NgayTao { get; set; }
-
-    public virtual ICollection<BinhLuan> BinhLuans { get; set; } = new List<BinhLuan>();
+    public DateOnly? NgayKetThuc { get; set; }
 
     public virtual ICollection<CongViec> CongViecs { get; set; } = new List<CongViec>();
 
-    public virtual ICollection<GiaiDoanDuAn> GiaiDoanDuAns { get; set; } = new List<GiaiDoanDuAn>();
+    public virtual ICollection<LichLamViec> LichLamViecs { get; set; } = new List<LichLamViec>();
 
-    public virtual NguoiDung MaNguoiPhuTrachNavigation { get; set; } = null!;
-
-    public virtual TrangThaiDuAn MaTrangThaiNavigation { get; set; } = null!;
+    public virtual NguoiDung NguoiPhuTrachNavigation { get; set; } = null!;
 
     public virtual ICollection<TaiLieu> TaiLieus { get; set; } = new List<TaiLieu>();
+
+    public virtual ICollection<ThongBao> ThongBaos { get; set; } = new List<ThongBao>();
 }

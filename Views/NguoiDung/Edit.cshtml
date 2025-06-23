@@ -1,0 +1,65 @@
+﻿@model QLDuAn.Models.NguoiDung
+
+@{
+    ViewData["Title"] = "Chỉnh sửa tài khoản";
+}
+
+<h2>Chỉnh sửa tài khoản</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="MaNguoiDung" />
+    <input type="hidden" asp-for="PasswordHash" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="HoTen" class="control-label"></label>
+        <input asp-for="HoTen" class="form-control" />
+        <span asp-validation-for="HoTen" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email" class="control-label"></label>
+        <input asp-for="Email" class="form-control" type="email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="newPassword" class="control-label">Mật khẩu mới (tùy chọn)</label>
+        <input type="password" name="newPassword" class="form-control" />
+        <span class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MaVaiTro" class="control-label">Vai trò</label>
+        <select asp-for="MaVaiTro" class="form-control" asp-items="ViewBag.VaiTroList"></select>
+        <span asp-validation-for="MaVaiTro" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MaTo" class="control-label">Tổ chuyên môn (tùy chọn)</label>
+        <select asp-for="MaTo" class="form-control" asp-items="ViewBag.ToList">
+            <option value="">-- Chưa gán tổ --</option>
+        </select>
+        <span asp-validation-for="MaTo" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TrangThai" class="control-label">Trạng thái</label>
+        <select asp-for="TrangThai" class="form-control">
+            <option value="true">Kích hoạt</option>
+            <option value="false">Vô hiệu hóa</option>
+        </select>
+        <span asp-validation-for="TrangThai" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Lưu" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

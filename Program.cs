@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using QLDuAn.Models; // Thêm dòng này để nhận diện QlduAnContext
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<QlduAnContext>(options =>
 
 // Đăng ký dịch vụ MVC
 builder.Services.AddControllersWithViews();
+builder.Services.AddHostedService<ThongBaoBackgroundJob>();
 
 // ✅ Kích hoạt Session
 builder.Services.AddSession(options =>
@@ -19,41 +21,30 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Thêm dòng này để cấu hình authentication mặc định
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Home/Login";
+        options.AccessDeniedPath = "/Home/AuthError"; // Thêm dòng này
+    });
+
+
 var app = builder.Build();
 
 // Middleware
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession(); // Đặt trước Authorization
+app.UseAuthentication();
 app.UseAuthorization();
-
-// ✅ Middleware kiểm tra đăng nhập
-app.Use(async (context, next) =>
-{
-    var path = context.Request.Path.ToString().ToLower();
-
-    // Các đường dẫn được truy cập tự do
-    var allowedPaths = new[]
-    {
-        "/home/login",
-        "/home/logout",
-        "/home/changepassword",
-        "/css", "/js", "/lib", "/images"
-    };
-
-    bool isAllowed = allowedPaths.Any(p => path.StartsWith(p));
-    if (!isAllowed && string.IsNullOrEmpty(context.Session.GetString("UserName")))
-    {
-        context.Response.Redirect("/home/login");
-        return;
-    }
-
-    await next();
-});
 
 // ✅ Route mặc định trỏ về Home/Login
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Login}/{id?}");
+
+// Route cho các controller khác, mặc định action=Index 
+app.MapControllerRoute( name: "controllerDefault", pattern: "{controller}/{action=Index}/{id?}");
 
 app.Run();

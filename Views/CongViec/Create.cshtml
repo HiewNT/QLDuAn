@@ -1,0 +1,70 @@
+﻿@model QLDuAn.Models.CongViec
+
+@{
+    ViewData["Title"] = "Tạo công việc mới";
+}
+
+<h2>Tạo công việc mới</h2>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="MaDuAn" class="control-label">Dự án</label>
+        <select asp-for="MaDuAn" class="form-control" asp-items="ViewBag.DuAnList">
+            <option value="">-- Chọn dự án --</option>
+        </select>
+        <span asp-validation-for="MaDuAn" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TenCongViec" class="control-label"></label>
+        <input asp-for="TenCongViec" class="form-control" />
+        <span asp-validation-for="TenCongViec" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GiaiDoan" class="control-label"></label>
+        <select asp-for="GiaiDoan" class="form-control" asp-items="ViewBag.GiaiDoanList"></select>
+        <span asp-validation-for="GiaiDoan" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TrangThai" class="control-label"></label>
+        <select asp-for="TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList"></select>
+        <span asp-validation-for="TrangThai" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Deadline" class="control-label"></label>
+        <input asp-for="Deadline" class="form-control" type="date" />
+        <span asp-validation-for="Deadline" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MaTo" class="control-label"></label>
+        <select asp-for="MaTo" class="form-control" asp-items="ViewBag.ToChuyenMonList">
+            <option value="">-- Chọn tổ chuyên môn --</option>
+        </select>
+        <span asp-validation-for="MaTo" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MaNguoiDung" class="control-label"></label>
+        <select asp-for="MaNguoiDung" class="form-control" asp-items="ViewBag.NguoiDungList">
+            <option value="">-- Chọn người thực hiện --</option>
+        </select>
+        <span asp-validation-for="MaNguoiDung" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Tạo" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

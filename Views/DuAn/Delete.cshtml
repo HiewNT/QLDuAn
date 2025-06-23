@@ -1,0 +1,13 @@
+﻿@model QLDuAn.Models.DuAn
+@{
+    ViewData["Title"] = "Xác nhận xóa dự án";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4 class="text-danger">Bạn có chắc chắn muốn xóa dự án: <strong>@Model.TenDuAn</strong>?</h4>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="MaDuAn" />
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

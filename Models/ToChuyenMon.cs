@@ -5,13 +5,9 @@ namespace QLDuAn.Models;
 
 public partial class ToChuyenMon
 {
-    public string MaTo { get; set; } = null!;
+    public int MaTo { get; set; }
 
     public string TenTo { get; set; } = null!;
-
-    public string? MoTa { get; set; }
-
-    public int? SoLuongNhanVien { get; set; }
 
     public virtual ICollection<CongViec> CongViecs { get; set; } = new List<CongViec>();
 

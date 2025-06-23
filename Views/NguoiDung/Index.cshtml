@@ -1,0 +1,46 @@
+﻿@model IEnumerable<QLDuAn.Models.NguoiDung>
+@{
+    ViewData["Title"] = "Danh sách người dùng";
+}
+<h2>@ViewData["Title"]</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Tạo tài khoản</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Vai trò</th>
+            <th>Tổ</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.HoTen</td>
+                <td>@item.Email</td>
+                <td>@item.MaVaiTroNavigation?.TenVaiTro</td>
+                <td>@item.MaToNavigation?.TenTo</td>
+                <td>@(item.TrangThai == true ? "✓" : "✗")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.MaNguoiDung" class="btn btn-sm btn-warning">Sửa</a>
+                    <form asp-action="Delete" method="post" style="display:inline">
+                        <input type="hidden" name="id" value="@item.MaNguoiDung" />
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Xác nhận xóa?')">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+    document.querySelectorAll('button[type="submit"]').forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('Xác nhận xóa?')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>

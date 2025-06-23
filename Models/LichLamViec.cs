@@ -5,21 +5,17 @@ namespace QLDuAn.Models;
 
 public partial class LichLamViec
 {
-    public string MaLich { get; set; } = null!;
+    public int MaLich { get; set; }
 
     public string TieuDe { get; set; } = null!;
 
-    public string? MoTa { get; set; }
+    public DateOnly Ngay { get; set; }
 
-    public DateTime NgayBatDau { get; set; }
+    public TimeOnly? GioBatDau { get; set; }
 
-    public DateTime NgayKetThuc { get; set; }
+    public TimeOnly? GioKetThuc { get; set; }
 
-    public string? MaCongViec { get; set; }
+    public int MaDuAn { get; set; }
 
-    public string? DiaDiem { get; set; }
-
-    public DateTime? NgayTao { get; set; }
-
-    public virtual CongViec? MaCongViecNavigation { get; set; }
+    public virtual DuAn MaDuAnNavigation { get; set; } = null!;
 }

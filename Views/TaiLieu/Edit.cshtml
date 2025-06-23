@@ -1,0 +1,93 @@
+﻿@model QLDuAn.Models.TaiLieu
+
+@{
+    ViewData["Title"] = "Chỉnh sửa tài liệu";
+}
+
+<h2>Chỉnh sửa tài liệu</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="MaTaiLieu" />
+    <input type="hidden" asp-for="FilePath" />
+    <input type="hidden" asp-for="NguoiUpload" />
+    <input type="hidden" asp-for="NgayUpload" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="TenTaiLieu" class="control-label"></label>
+        <input asp-for="TenTaiLieu" class="form-control" />
+        <span asp-validation-for="TenTaiLieu" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MaDuAn" class="control-label">Dự án (tùy chọn)</label>
+        <select asp-for="MaDuAn" class="form-control" asp-items="ViewBag.DuAnList">
+            <option value="">-- Không gắn dự án --</option>
+        </select>
+        <span asp-validation-for="MaDuAn" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MaCongViec" class="control-label">Công việc (tùy chọn)</label>
+        <select asp-for="MaCongViec" class="form-control" asp-items="ViewBag.CongViecList">
+            <option value="">-- Không gắn công việc --</option>
+        </select>
+        <span asp-validation-for="MaCongViec" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Phân quyền truy cập</label>
+        <div id="phanQuyenContainer">
+            @foreach (var perm in Model.PhanQuyenTaiLieus)
+            {
+                <div class="phan-quyen-row mb-2">
+                    <select name="vaiTroIds" class="form-control d-inline-block w-50" asp-items="ViewBag.VaiTroList">
+                        <option value="@perm.MaVaiTro" selected>@perm.MaVaiTroNavigation.TenVaiTro</option>
+                    </select>
+                    <select name="quyenTruyCaps" class="form-control d-inline-block w-25">
+                        <option value="Xem" selected="@(perm.QuyenTruyCap == "Xem")">Xem</option>
+                        <option value="Tải" selected="@(perm.QuyenTruyCap == "Tải")">Tải</option>
+                        <option value="Sửa" selected="@(perm.QuyenTruyCap == "Sửa")">Sửa</option>
+                        <option value="Xóa" selected="@(perm.QuyenTruyCap == "Xóa")">Xóa</option>
+                    </select>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addPhanQuyenRow()">Thêm</button>
+                </div>
+            }
+            @if (!Model.PhanQuyenTaiLieus.Any())
+            {
+                <div class="phan-quyen-row mb-2">
+                    <select name="vaiTroIds" class="form-control d-inline-block w-50" asp-items="ViewBag.VaiTroList">
+                        <option value="">-- Chọn vai trò --</option>
+                    </select>
+                    <select name="quyenTruyCaps" class="form-control d-inline-block w-25">
+                        <option value="Xem">Xem</option>
+                        <option value="Tải">Tải</option>
+                        <option value="Sửa">Sửa</option>
+                        <option value="Xóa">Xóa</option>
+                    </select>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addPhanQuyenRow()">Thêm</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Lưu" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function addPhanQuyenRow() {
+            var container = document.getElementById('phanQuyenContainer');
+            var newRow = container.querySelector('.phan-quyen-row').cloneNode(true);
+            newRow.querySelector('select[name="vaiTroIds"]').value = '';
+            newRow.querySelector('select[name="quyenTruyCaps"]').value = 'Xem';
+            container.appendChild(newRow);
+        }
+    </script>
+}

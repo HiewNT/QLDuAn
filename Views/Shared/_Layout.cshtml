@@ -1,49 +1,239 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var isLoggedIn = User.Identity.IsAuthenticated;
+    var userName = isLoggedIn ? User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value : null;
+    // Mock notification count - in real app, get from database or service
+    var notificationCount = 5;
+}
+<!DOCTYPE html>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - QLDuAn</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/QLDuAn.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
 </head>
-<body>
+<body class="bg-light d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">QLDuAn</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="@(isLoggedIn ? "Index" : "Login")">
+                    <i class="bi bi-kanban me-2"></i>ONE TOUCH PRODUCTION
+                </a>
+
+                @if (isLoggedIn)
+                {
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <div class="navbar-nav ms-auto d-flex align-items-center">
+                            <!-- Notification Bell -->
+                            <div class="nav-item dropdown me-3">
+                                <!-- Thay phần notificationCount và notification items bằng đoạn sau -->
+                                <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="notificationDropdown">
+                                    <i class="bi bi-bell text-white fs-5"></i>
+                                    <span id="notificationBadge" class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger" style="display:none"></span>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 350px; max-height: 400px;">
+                                    <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Thông báo</h6>
+                                        <a href="#" class="text-primary small" onclick="markAllAsRead();return false;">Đánh dấu đã đọc</a>
+                                    </div>
+                                    <div id="notificationContainer" class="notification-container" style="max-height: 300px; overflow-y: auto;">
+                                        <div class="text-center text-muted py-3">Đang tải...</div>
+                                    </div>
+                                    <div class="dropdown-footer text-center py-2">
+                                        <a href="/ThongBao/Index" class="text-primary small">Xem tất cả thông báo</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- User Dropdown -->
+                            <div class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle me-1"></i>
+                                    <strong>@userName</strong>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Home" asp-action="Profile">
+                                            <i class="bi bi-person me-2"></i>Hồ sơ cá nhân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Home" asp-action="Settings">
+                                            <i class="bi bi-gear me-2"></i>Cài đặt
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Home" asp-action="ChangePassword">
+                                            <i class="bi bi-key me-2"></i>Đổi mật khẩu
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" asp-controller="Home" asp-action="Logout">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+
+    <div class="container-fluid flex-grow-1 p-0">
+        <div class="row g-0">
+            @if (isLoggedIn)
+            {
+                <!-- Sidebar -->
+                <div class="col-lg-3 col-xl-2 d-none d-lg-block">
+                    <div class="bg-white shadow-sm" style="min-height: calc(100vh - 56px);">
+                        <div class="p-3 border-bottom">
+                            <h6 class="text-muted mb-0 text-uppercase fw-semibold">Menu chính</h6>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-3 text-primary"></i> Trang chủ
+                            </a>
+                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="NguoiDung" asp-action="Index">
+                                <i class="bi bi-people me-3 text-success"></i> Người dùng
+                            </a>
+                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="DuAn" asp-action="Index">
+                                <i class="bi bi-folder me-3 text-success"></i> Dự án
+                            </a>
+                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="CongViec" asp-action="Index">
+                                <i class="bi bi-list-task me-3 text-warning"></i> Công việc
+                            </a>
+                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="TaiLieu" asp-action="Index">
+                                <i class="bi bi-file-text me-3 text-info"></i> Tài liệu
+                            </a>
+                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="ToChuyenMon" asp-action="Index">
+                                <i class="bi bi-people-fill me-3 text-info"></i> Tổ chuyên môn
+                            </a>
+                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="ThongBao" asp-action="Index">
+                                <i class="bi bi-bell me-3 text-secondary"></i> Thông báo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Main content -->
+            <div class="@(isLoggedIn ? "col-lg-9 col-xl-10" : "col-12")">
+                <main class="p-4">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+                        </div>
+                    }
+
+                    @if (TempData["InfoMessage"] != null)
+                    {
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="bi bi-info-circle me-2"></i> @TempData["InfoMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["WarningMessage"] != null)
+                    {
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i> @TempData["WarningMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - QLDuAn - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="bg-white border-top mt-auto py-3">
+        <div class="container-fluid text-center">
+            <div class="row">
+                <div class="col-md-6 text-md-start">
+                    <span class="text-muted">&copy; 2025 - QLDuAn. All rights reserved.</span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="text-muted">Phiên bản 1.0.0</span>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+                     function loadNotifications() {
+            $.get('/ThongBao/GetAll', function(data) {
+                var container = $('#notificationContainer');
+                container.empty();
+                if (data.length === 0) {
+                    container.append('<div class="text-center text-muted py-3">Không có thông báo</div>');
+                    $('#notificationBadge').hide();
+                } else {
+                    var unreadCount = data.filter(tb => !tb.daDoc).length;
+                    if (unreadCount > 0) {
+                        $('#notificationBadge').text(unreadCount > 99 ? "99+" : unreadCount).show();
+                    } else {
+                        $('#notificationBadge').hide();
+                    }
+                    data.forEach(function(tb) {
+                        // Nếu có MaCongViec thì chuyển đến trang công việc, nếu không thì về trang thông báo
+                        var link = tb.maCongViec ? `/CongViec/Details/${tb.maCongViec}` : '/ThongBao/Index';
+                        container.append(`
+                            <a href="#" class="dropdown-item notification-item${!tb.daDoc ? ' unread' : ''} py-3"
+                                onclick="markAsReadAndGo(${tb.maThongBao}, '${link}'); return false;">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold">${tb.tieuDe}</h6>
+                                        <p class="mb-1 text-muted small">${tb.noiDung}</p>
+                                        <small class="text-muted">${tb.thoiGian}</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                        `);
+                    });
+                }
+            });
+        }
+                function markAllAsRead() {
+            $.post('/ThongBao/MarkAllAsRead', function () {
+                loadNotifications();
+            });
+        }
+        function markAsReadAndGo(id, url) {
+            $.post('/ThongBao/MarkAsRead', { id: id }, function() {
+                window.location.href = url;
+            });
+        }
+        $(document).ready(function() {
+            loadNotifications();
+            $('#notificationDropdown').on('show.bs.dropdown', loadNotifications);
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

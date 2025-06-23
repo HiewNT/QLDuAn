@@ -1,0 +1,65 @@
+﻿@model IEnumerable<QLDuAn.Models.CongViec>
+
+@{
+    ViewData["Title"] = "Danh sách công việc";
+}
+
+<h2>Danh sách công việc</h2>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Tạo công việc mới</a>
+</p>
+<div class="mb-3">
+    <form asp-action="Index" method="get">
+        <div class="form-group">
+            <label for="maDuAn">Lọc theo dự án:</label>
+            <select id="maDuAn" name="maDuAn" class="form-control d-inline-block w-auto" onchange="this.form.submit()">
+                <option value="" selected="@(string.IsNullOrEmpty(Context.Request.Query["maDuAn"]) ? "selected" : null)">-- Tất cả dự án --</option>
+                @foreach (var item in ViewBag.DuAnList as SelectList)
+                {
+                    <option value="@item.Value" selected="@(item.Value == Context.Request.Query["maDuAn"].ToString() ? "selected" : null)">@item.Text</option>
+                }
+            </select>
+        </div>
+    </form>
+</div>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Dự án</th>
+            <th>Tên công việc</th>
+            <th>Giai đoạn</th>
+            <th>Trạng thái</th>
+            <th>Deadline</th>
+            <th>Người thực hiện</th>
+            <th>Tổ chuyên môn</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var isManager = (ViewBag.UserRole == "Admin" || item.MaDuAnNavigation?.NguoiPhuTrach == ViewBag.UserId);
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.MaDuAnNavigation.TenDuAn)</td>
+                <td>@Html.DisplayFor(modelItem => item.TenCongViec)</td>
+                <td>@Html.DisplayFor(modelItem => item.GiaiDoan)</td>
+                <td>@Html.DisplayFor(modelItem => item.TrangThai)</td>
+                <td>@Html.DisplayFor(modelItem => item.Deadline)</td>
+                <td>@Html.DisplayFor(modelItem => item.MaNguoiDungNavigation.HoTen)</td>
+                <td>@Html.DisplayFor(modelItem => item.MaToNavigation.TenTo)</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.MaCongViec" class="btn btn-info btn-sm">Chi tiết</a>
+                    @if (isManager)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.MaCongViec" class="btn btn-warning btn-sm">Sửa</a>
+                        <form asp-action="Delete" asp-route-id="@item.MaCongViec" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,83 @@
+﻿@model QLDuAn.Models.DuAn
+
+@{
+    ViewData["Title"] = "Chi tiết dự án";
+
+    var isManager = (ViewBag.UserRole == "Admin" || Model.NguoiPhuTrach == ViewBag.UserId);
+}
+
+<h2>Chi tiết dự án</h2>
+
+<div class="card">
+    <div class="card-header">
+        <h4>@Html.DisplayFor(model => model.TenDuAn)</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Mô tả</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.MoTa)</dd>
+
+            <dt class="col-sm-3">Trạng thái</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.TrangThai)</dd>
+
+            <dt class="col-sm-3">Người phụ trách</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.NguoiPhuTrachNavigation.HoTen)</dd>
+
+            <dt class="col-sm-3">Ngày bắt đầu</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.NgayBatDau)</dd>
+
+            <dt class="col-sm-3">Ngày kết thúc</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.NgayKetThuc)</dd>
+        </dl>
+    </div>
+</div>
+
+<h3 class="mt-4">Danh sách công việc</h3>
+
+@if (Model.CongViecs != null && Model.CongViecs.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tên công việc</th>
+                <th>Giai đoạn</th>
+                <th>Trạng thái</th>
+                <th>Deadline</th>
+                <th>Người thực hiện</th>
+                <th>Tổ chuyên môn</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var congViec in Model.CongViecs)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => congViec.TenCongViec)</td>
+                    <td>@Html.DisplayFor(modelItem => congViec.GiaiDoan)</td>
+                    <td>@Html.DisplayFor(modelItem => congViec.TrangThai)</td>
+                    <td>@Html.DisplayFor(modelItem => congViec.Deadline)</td>
+                    <td>@Html.DisplayFor(modelItem => congViec.MaNguoiDungNavigation.HoTen)</td>
+                    <td>@Html.DisplayFor(modelItem => congViec.MaToNavigation.TenTo)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Chưa có công việc nào cho dự án này.</p>
+}
+    <p>
+@if (isManager)
+{
+
+        <a asp-controller="CongViec" asp-action="Index" asp-route-maDuAn="@Model.MaDuAn" class="btn btn-primary">Quản lý công việc</a>
+        <a asp-action="Edit" asp-route-id="@Model.MaDuAn" class="btn btn-warning">Sửa</a>
+   
+}
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</p>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

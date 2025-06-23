@@ -5,29 +5,25 @@ namespace QLDuAn.Models;
 
 public partial class TaiLieu
 {
-    public string MaTaiLieu { get; set; } = null!;
+    public int MaTaiLieu { get; set; }
 
     public string TenTaiLieu { get; set; } = null!;
 
-    public string DuongDan { get; set; } = null!;
+    public string FilePath { get; set; } = null!;
 
-    public string? LoaiFile { get; set; }
+    public int MaDuAn { get; set; }
 
-    public long? KichThuoc { get; set; }
+    public int? MaCongViec { get; set; }
 
-    public string? MaDuAn { get; set; }
+    public int NguoiUpload { get; set; }
 
-    public string? MaCongViec { get; set; }
-
-    public string MaNguoiTai { get; set; } = null!;
-
-    public DateTime? NgayTai { get; set; }
+    public DateTime? NgayUpload { get; set; }
 
     public virtual CongViec? MaCongViecNavigation { get; set; }
 
-    public virtual DuAn? MaDuAnNavigation { get; set; }
+    public virtual DuAn MaDuAnNavigation { get; set; } = null!;
 
-    public virtual NguoiDung MaNguoiTaiNavigation { get; set; } = null!;
+    public virtual NguoiDung NguoiUploadNavigation { get; set; } = null!;
 
     public virtual ICollection<PhanQuyenTaiLieu> PhanQuyenTaiLieus { get; set; } = new List<PhanQuyenTaiLieu>();
 }

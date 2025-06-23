@@ -5,25 +5,17 @@ namespace QLDuAn.Models;
 
 public partial class BinhLuan
 {
-    public string MaBinhLuan { get; set; } = null!;
+    public int MaBinhLuan { get; set; }
 
     public string NoiDung { get; set; } = null!;
 
-    public string? MaDuAn { get; set; }
+    public DateTime? NgayTao { get; set; }
 
-    public string? MaCongViec { get; set; }
+    public int MaNguoiDung { get; set; }
 
-    public string MaNguoiBinhLuan { get; set; } = null!;
+    public int MaCongViec { get; set; }
 
-    public DateTime? NgayBinhLuan { get; set; }
+    public virtual CongViec MaCongViecNavigation { get; set; } = null!;
 
-    public string? MaBinhLuanCha { get; set; }
-
-    public virtual CongViec? MaCongViecNavigation { get; set; }
-
-    public virtual DuAn? MaDuAnNavigation { get; set; }
-
-    public virtual NguoiDung MaNguoiBinhLuanNavigation { get; set; } = null!;
-
-    public virtual ICollection<TagNguoiDung> TagNguoiDungs { get; set; } = new List<TagNguoiDung>();
+    public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 }

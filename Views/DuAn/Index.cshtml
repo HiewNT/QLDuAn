@@ -1,0 +1,51 @@
+﻿@model IEnumerable<QLDuAn.Models.DuAn>
+
+@{
+    ViewData["Title"] = "Danh sách dự án";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Danh sách dự án</h2>
+
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Tạo dự án mới</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tên dự án</th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th>Người phụ trách</th>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var isManager = (ViewBag.UserRole == "Admin" || item.NguoiPhuTrach == ViewBag.UserId);
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.TenDuAn)</td>
+                <td>@Html.DisplayFor(modelItem => item.MoTa)</td>
+                <td>@Html.DisplayFor(modelItem => item.TrangThai)</td>
+                <td>@Html.DisplayFor(modelItem => item.NguoiPhuTrachNavigation.HoTen)</td>
+                <td>@Html.DisplayFor(modelItem => item.NgayBatDau)</td>
+                <td>@Html.DisplayFor(modelItem => item.NgayKetThuc)</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.MaDuAn" class="btn btn-success btn-sm">Chi Tiết</a>
+                    @if (isManager)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.MaDuAn" class="btn btn-warning btn-sm">Sửa</a>
+                        <form asp-action="Delete" asp-route-id="@item.MaDuAn" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa dự án này?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

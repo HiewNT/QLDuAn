@@ -1,0 +1,65 @@
+﻿@model QLDuAn.Models.CongViec
+
+@{
+    ViewData["Title"] = "Chi tiết công việc";
+    var isManager = (ViewBag.UserRole == "Admin" || Model.MaDuAnNavigation?.NguoiPhuTrach == ViewBag.UserId);
+}
+
+<h2>Chi tiết công việc</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Tên công việc</dt>
+            <dd class="col-sm-9">@Model.TenCongViec</dd>
+
+            <dt class="col-sm-3">Dự án</dt>
+            <dd class="col-sm-9">@Model.MaDuAnNavigation?.TenDuAn</dd>
+
+            <dt class="col-sm-3">Giai đoạn</dt>
+            <dd class="col-sm-9">@Model.GiaiDoan</dd>
+
+            <dt class="col-sm-3">Trạng thái</dt>
+            <dd class="col-sm-9">@Model.TrangThai</dd>
+
+            <dt class="col-sm-3">Deadline</dt>
+            <dd class="col-sm-9">@Model.Deadline?.ToString("dd/MM/yyyy")</dd>
+
+            <dt class="col-sm-3">Người thực hiện</dt>
+            <dd class="col-sm-9">@Model.MaNguoiDungNavigation?.HoTen</dd>
+
+            <dt class="col-sm-3">Tổ chuyên môn</dt>
+            <dd class="col-sm-9">@Model.MaToNavigation?.TenTo</dd>
+        </dl>
+    </div>
+</div>
+
+@if (Model.TaiLieus != null && Model.TaiLieus.Any())
+{
+    <h5>Tài liệu liên quan</h5>
+    <ul>
+        @foreach (var tl in Model.TaiLieus)
+        {
+            <li>@tl.TenTaiLieu</li>
+        }
+    </ul>
+}
+
+@if (Model.BinhLuans != null && Model.BinhLuans.Any())
+{
+    <h5>Bình luận</h5>
+    <ul>
+        @foreach (var bl in Model.BinhLuans.OrderByDescending(b => b.NgayTao))
+        {
+            <li>
+                <strong>@bl.MaNguoiDungNavigation?.HoTen</strong> (@bl.NgayTao?.ToString("dd/MM/yyyy HH:mm")): @bl.NoiDung
+            </li>
+        }
+    </ul>
+}
+
+<a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+@if (isManager)
+{
+<a asp-action="Edit" asp-route-id="@Model.MaCongViec" class="btn btn-primary">Sửa</a>
+}
