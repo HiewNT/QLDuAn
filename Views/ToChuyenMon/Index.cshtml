@@ -2,44 +2,144 @@
 
 @{
     ViewData["Title"] = "Danh sách tổ chuyên môn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Danh sách tổ chuyên môn</h2>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">Tổ chuyên môn</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-0 text-dark fw-bold">
+                        <i class="bi bi-diagram-3 me-2 text-primary"></i>Quản lý tổ chuyên môn
+                    </h1>
+                    <p class="text-muted small mt-2 mb-0">Quản lý các tổ chuyên môn và phân công nhân sự trong hệ thống</p>
+                </div>
+                <div>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Tạo tổ mới
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Tạo tổ mới</a>
-</p>
+    </div>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Tên tổ</th>
-            <th>Số nhân sự</th>
-            <th>Tổng công việc</th>
-            <th>Hoàn thành</th>
-            <th>Trễ hạn</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            var workload = ViewBag.Workload[item.MaTo];
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.TenTo)</td>
-                <td>@workload.Members</td>
-                <td>@workload.TotalTasks</td>
-                <td>@workload.CompletedTasks</td>
-                <td>@workload.OverdueTasks</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.MaTo" class="btn btn-primary btn-sm">Chi tiết</a>
-                    <a asp-action="Edit" asp-route-id="@item.MaTo" class="btn btn-warning btn-sm">Sửa</a>
-                    <a asp-action="AssignMembers" asp-route-id="@item.MaTo" class="btn btn-info btn-sm">Gán nhân sự</a>
-                    <form asp-action="Delete" asp-route-id="@item.MaTo" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa tổ này?');">
-                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <!-- Teams Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive p-3">
+                <table id="teamsTable" class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 ps-4">Tên tổ</th>
+                            <th class="border-0">Số nhân sự</th>
+                            <th class="border-0">Tổng công việc</th>
+                            <th class="border-0">Hoàn thành</th>
+                            <th class="border-0">Trễ hạn</th>
+                            <th class="border-0 text-end pe-4">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var workload = ViewBag.Workload[item.MaTo];
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        
+                                        <div>
+                                            <div class="fw-semibold">@(item.TenTo ?? "Chưa đặt tên")</div>
+                                        </div>
+                                    </div>
+                                </td>
+                            <td class="fs-5 fw-bold text-primary">@workload.Members</td>
+                            <td class="fs-5 fw-bold text-dark">@workload.TotalTasks</td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success fs-5 fw-bold">
+                                    @workload.CompletedTasks
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-danger-subtle text-danger fs-5 fw-bold">
+                                    @workload.OverdueTasks
+                                </span>
+                            </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@item.MaTo" class="btn btn-outline-info btn-sm">
+                                            <i class="bi bi-eye me-1"></i>Chi tiết
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.MaTo" class="btn btn-outline-warning btn-sm ms-1">
+                                            <i class="bi bi-pencil me-1"></i>Sửa
+                                        </a>
+                                        <a asp-action="AssignMembers" asp-route-id="@item.MaTo" class="btn btn-outline-primary btn-sm ms-1">
+                                            <i class="bi bi-person-plus me-1"></i>Gán nhân sự
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@item.MaTo" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm ms-1"
+                                                    onclick="return confirm('Bạn có chắc muốn xóa tổ này? Hành động này không thể hoàn tác.')">
+                                                <i class="bi bi-trash me-1"></i>Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet">
+    
+    <script>
+        $(document).ready(function () {
+            var table = $('#teamsTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm:",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Sau",
+                        "previous": "Trước"
+                    },
+                    "zeroRecords": "Không tìm thấy dữ liệu phù hợp"
+                }
+            });
+
+            // Custom search input
+            $('#searchInput').on('input', function () {
+                table.column(0).search($(this).val()).draw();
+            });
+
+            // Custom filter for member count
+            $('#memberFilter').on('change', function () {
+                var val = $(this).val();
+                table.column(1).search(val, true, false).draw();
+            });
+
+            // Confirm delete
+            $('button[type="submit"]').on('click', function (e) {
+                if (!confirm('Bạn có chắc muốn xóa tổ này? Hành động này không thể hoàn tác.')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

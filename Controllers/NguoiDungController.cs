@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using QLDuAn.Models;
 using System.Linq;
 using System.Threading.Tasks;
+using X.PagedList;
 
 namespace QLDuAn.Controllers
 {
@@ -55,7 +56,7 @@ namespace QLDuAn.Controllers
         {
             ViewBag.VaiTroList = new SelectList(_context.VaiTros, "MaVaiTro", "TenVaiTro");
             ViewBag.ToList = new SelectList(_context.ToChuyenMons, "MaTo", "TenTo");
-            return View();
+            return View(new NguoiDung());
         }
 
         // POST: NguoiDung/Create
@@ -183,7 +184,21 @@ namespace QLDuAn.Controllers
             TempData["SuccessMessage"] = "Xóa tài khoản thành công!";
             return RedirectToAction(nameof(Index));
         }
+        // GET: NguoiDung/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            var nguoiDung = await _context.NguoiDungs
+                .Include(n => n.MaVaiTroNavigation)
+                .Include(n => n.MaToNavigation)
+                .FirstOrDefaultAsync(m => m.MaNguoiDung == id);
 
+            if (nguoiDung == null)
+            {
+                return NotFound();
+            }
+
+            return View(nguoiDung);
+        }
         private bool NguoiDungExists(int id)
         {
             return _context.NguoiDungs.Any(e => e.MaNguoiDung == id);

@@ -1,0 +1,70 @@
+﻿@model QLDuAn.Models.NguoiDung
+
+@{
+    ViewData["Title"] = "Chi tiết người dùng";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="/NguoiDung" class="text-decoration-none">Người dùng</a></li>
+                    <li class="breadcrumb-item active">Chi tiết</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h2 mb-0 text-dark fw-bold">
+                    <i class="bi bi-person-vcard me-2 text-primary"></i>Thông tin người dùng
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">Thông tin cá nhân</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Họ tên:</dt>
+                        <dd class="col-sm-8">@Model.HoTen</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.TrangThai == true)
+                            {
+                                <span class="badge bg-success">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Không hoạt động</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">Thông tin công việc</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Vai trò:</dt>
+                        <dd class="col-sm-8">@Model.MaVaiTroNavigation?.TenVaiTro</dd>
+
+                        <dt class="col-sm-4">Tổ chuyên môn:</dt>
+                        <dd class="col-sm-8">@Model.MaToNavigation?.TenTo</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <a asp-action="Index" class="btn btn-secondary me-2"><i class="bi bi-arrow-left me-1"></i>Quay lại</a>
+                <a asp-action="Edit" asp-route-id="@Model.MaNguoiDung" class="btn btn-primary">
+                    <i class="bi bi-pencil-square me-1"></i>Chỉnh sửa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

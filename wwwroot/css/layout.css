@@ -29,10 +29,8 @@ body {
 }
 
 .notification-item {
-    border: none;
-    transition: background-color 0.2s ease;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
+    white-space: normal !important;
+    word-break: break-word !important;
 }
 
     .notification-item:hover {
@@ -48,6 +46,13 @@ body {
             background-color: #81d4fa; /* Màu sáng hơn khi hover */
         }
 
+
+.dropdown-menu.notification-dropdown {
+    width: 350px !important;
+    max-width: 100vw;
+    min-width: 300px;
+    padding: 0.5rem 0;
+}
 .notification-icon {
     min-width: 24px;
     min-height: 24px;

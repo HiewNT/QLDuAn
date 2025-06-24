@@ -11,10 +11,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - QLDuAn</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+
+
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.7/index.global.min.css" rel="stylesheet" />
+
+    <!-- FullCalendar JS (dạng global, xuất Calendar ra window) -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.7/index.global.min.js"></script>
+
+
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
     <header>
@@ -42,9 +52,9 @@
                                 <div class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 350px; max-height: 400px;">
                                     <div class="dropdown-header d-flex justify-content-between align-items-center">
                                         <h6 class="mb-0">Thông báo</h6>
-                                        <a href="#" class="text-primary small" onclick="markAllAsRead();return false;">Đánh dấu đã đọc</a>
+                                        <a href="#" class="text-primary small" onclick="markAllAsRead(event); return false;">Đánh dấu đã đọc</a>
                                     </div>
-                                    <div id="notificationContainer" class="notification-container" style="max-height: 300px; overflow-y: auto;">
+                                    <div id="notificationContainer" class="notification-container">
                                         <div class="text-center text-muted py-3">Đang tải...</div>
                                     </div>
                                     <div class="dropdown-footer text-center py-2">
@@ -52,34 +62,36 @@
                                     </div>
                                 </div>
                             </div>
-
                             <!-- User Dropdown -->
                             <div class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-person-circle me-1"></i>
                                     <strong>@userName</strong>
                                 </a>
+
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" asp-controller="Home" asp-action="Profile">
+                                        <a class="dropdown-item" asp-action="Profile" asp-controller="Home">
                                             <i class="bi bi-person me-2"></i>Hồ sơ cá nhân
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" asp-controller="Home" asp-action="Settings">
+                                        <a class="dropdown-item" asp-action="Settings" asp-controller="Home">
                                             <i class="bi bi-gear me-2"></i>Cài đặt
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" asp-controller="Home" asp-action="ChangePassword">
+                                        <a class="dropdown-item" asp-action="ChangePassword" asp-controller="Home" method="get">
                                             <i class="bi bi-key me-2"></i>Đổi mật khẩu
                                         </a>
                                     </li>
-                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item text-danger" asp-controller="Home" asp-action="Logout">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                        </a>
+                                        <form id="logoutForm" asp-action="Logout" asp-controller="Home" method="post" class="d-inline">
+                                            <button type="submit" class="fw-bold dropdown-item">
+                                                <i class="bi bi-box-arrow-right me-1"></i>Đăng xuất
+                                            </button>
+                                        </form>
                                     </li>
                                 </ul>
                             </div>
@@ -181,9 +193,28 @@
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var logoutForm = document.getElementById('logoutForm');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
     <script>
                      function loadNotifications() {
             $.get('/ThongBao/GetAll', function(data) {
@@ -203,25 +234,33 @@
                         // Nếu có MaCongViec thì chuyển đến trang công việc, nếu không thì về trang thông báo
                         var link = tb.maCongViec ? `/CongViec/Details/${tb.maCongViec}` : '/ThongBao/Index';
                         container.append(`
-                            <a href="#" class="dropdown-item notification-item${!tb.daDoc ? ' unread' : ''} py-3"
-                                onclick="markAsReadAndGo(${tb.maThongBao}, '${link}'); return false;">
-                                <div class="d-flex">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1 fw-semibold">${tb.tieuDe}</h6>
-                                        <p class="mb-1 text-muted small">${tb.noiDung}</p>
-                                        <small class="text-muted">${tb.thoiGian}</small>
+                                   <a href="#" class="dropdown-item notification-item d-flex align-items-start py-3 px-3${!tb.daDoc ? ' bg-light fw-bold' : ''}"
+                               onclick="markAsReadAndGo(${tb.maThongBao}, '${link}'); return false;">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">${tb.tieuDe}</h6>
+                                        <small class="text-muted ms-2">${tb.thoiGian}</small>
                                     </div>
+                                    <p class="mb-0 text-muted small">${tb.noiDung}</p>
                                 </div>
                             </a>
-                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-divider my-0"></div>
+
                         `);
                     });
                 }
             });
         }
-                function markAllAsRead() {
+                  function markAllAsRead(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             $.post('/ThongBao/MarkAllAsRead', function () {
-                loadNotifications();
+                var container = document.getElementById('notificationContainer');
+                if (container) {
+                    loadNotifications();
+                }
             });
         }
         function markAsReadAndGo(id, url) {
@@ -235,5 +274,6 @@
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Styles", required: false)
 </body>
 </html>

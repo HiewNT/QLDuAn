@@ -24,26 +24,17 @@ namespace QLDuAn.Controllers
             var duAnProgress = await _context.DuAns
                 .Select(d => new {
                     d.TenDuAn,
+                    d.TrangThai,
                     TongCV = d.CongViecs.Count(),
                     HoanThanh = d.CongViecs.Count(cv => cv.TrangThai == "Hoàn thành")
                 })
                 .ToListAsync();
 
-            // Khối lượng công việc từng tổ
-            var toCongViec = await _context.ToChuyenMons
-                .Select(to => new {
-                    to.TenTo,
-                    TongCV = to.CongViecs.Count(),
-                    DangLam = to.CongViecs.Count(cv => cv.TrangThai == "Đang thực hiện"),
-                    HoanThanh = to.CongViecs.Count(cv => cv.TrangThai == "Hoàn thành"),
-                    TreHan = to.CongViecs.Count(cv => cv.TrangThai == "Trễ hạn")
-                })
-                .ToListAsync();
 
             ViewBag.DuAnProgress = duAnProgress;
-            ViewBag.ToCongViec = toCongViec;
 
             ViewBag.SoNguoiDung = _context.NguoiDungs.Count();
+            ViewBag.SoTo = _context.ToChuyenMons.Count();
             ViewBag.SoDuAn = _context.DuAns.Count();
             ViewBag.SoCongViec = _context.CongViecs.Count();
             ViewBag.SoTaiLieu = _context.TaiLieus.Count();

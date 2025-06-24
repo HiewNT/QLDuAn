@@ -1,83 +1,147 @@
 ﻿@model QLDuAn.Models.DuAn
-
 @{
     ViewData["Title"] = "Chi tiết dự án";
-
-    var isManager = (ViewBag.UserRole == "Admin" || Model.NguoiPhuTrach == ViewBag.UserId);
 }
 
-<h2>Chi tiết dự án</h2>
-
-<div class="card">
-    <div class="card-header">
-        <h4>@Html.DisplayFor(model => model.TenDuAn)</h4>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Dự án</a></li>
+                    <li class="breadcrumb-item active">Chi tiết</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="h3 mb-0">@Model.TenDuAn</h2>
+                <div>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Quay lại
+                    </a>
+                    <form asp-action="GenerateReport" asp-route-id="@Model.MaDuAn" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Xuất báo cáo
+                        </button>
+                    </form>
+                    <a asp-action="Edit" asp-route-id="@Model.MaDuAn" class="btn btn-primary ms-2">
+                        <i class="bi bi-pencil me-1"></i>Sửa
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">Mô tả</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.MoTa)</dd>
 
-            <dt class="col-sm-3">Trạng thái</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.TrangThai)</dd>
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Thông tin chính -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Thông tin dự án</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
 
-            <dt class="col-sm-3">Người phụ trách</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.NguoiPhuTrachNavigation.HoTen)</dd>
+                        <dt class="col-sm-3">Người phụ trách</dt>
+                        <dd class="col-sm-9">
+                            <span class="fs-6 badge bg-primary-subtle text-primary">
+                                <i class="bi bi-person me-1"></i>@Model.NguoiPhuTrachNavigation?.HoTen
+                            </span>
+                        </dd>
 
-            <dt class="col-sm-3">Ngày bắt đầu</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.NgayBatDau)</dd>
+                        <dt class="col-sm-3">Ngày bắt đầu</dt>
+                        <dd class="col-sm-9">@Model.NgayBatDau?.ToString("dd/MM/yyyy")</dd>
 
-            <dt class="col-sm-3">Ngày kết thúc</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.NgayKetThuc)</dd>
-        </dl>
+                        <dt class="col-sm-3">Ngày kết thúc</dt>
+                        <dd class="col-sm-9">@Model.NgayKetThuc?.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-3">Trạng thái</dt>
+                        <dd class="col-sm-9">
+                            @switch (Model.TrangThai)
+                            {
+                                case "Chuẩn bị":
+                                    <span class="fs-6 badge bg-secondary-subtle text-secondary">
+                                        <i class="bi bi-hourglass-split me-1"></i>Chuẩn bị
+                                    </span>
+                                    break;
+                                case "Đang thực hiện":
+                                    <span class="fs-6 badge bg-primary-subtle text-primary">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Đang thực hiện
+                                    </span>
+                                    break;
+                                case "Hoàn thành":
+                                    <span class="fs-6 badge bg-success-subtle text-success">
+                                        <i class="bi bi-check-circle me-1"></i>Hoàn thành
+                                    </span>
+                                    break;
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Mô tả</dt>
+                        <dd class="col-sm-9">@Model.MoTa</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Danh sách công việc -->
+            @if (Model.CongViecs != null && Model.CongViecs.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-list-task me-2"></i>Danh sách công việc
+
+                                <a asp-controller="CongViec" asp-action="Index" asp-route-maDuAn="@Model.MaDuAn"
+                                   class="btn btn-secondary w-30">
+                                    <i class="bi bi-arrow-right-circle me-1"></i>
+                                    Quản lý công việc
+                                </a>
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Tên công việc</th>
+                                        <th>Người thực hiện</th>
+                                        <th>Deadline</th>
+                                        <th class="text-center">Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var cv in Model.CongViecs)
+                                    {
+                                        <tr>
+                                            <td>@cv.TenCongViec</td>
+                                            <td>@cv.MaNguoiDungNavigation?.HoTen</td>
+                                            <td>@cv.Deadline?.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-center">
+                                                @switch (cv.TrangThai)
+                                                {
+                                                    case "Chưa bắt đầu":
+                                                        <span class="badge bg-secondary">Chưa bắt đầu</span>
+                                                        break;
+                                                    case "Đang làm":
+                                                        <span class="badge bg-warning">Đang làm</span>
+                                                        break;
+                                                    case "Hoàn thành":
+                                                        <span class="badge bg-success">Hoàn thành</span>
+                                                        break;
+                                                    case "Trễ hạn":
+                                                        <span class="badge bg-danger">Trễ hạn</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
     </div>
 </div>
-
-<h3 class="mt-4">Danh sách công việc</h3>
-
-@if (Model.CongViecs != null && Model.CongViecs.Any())
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Tên công việc</th>
-                <th>Giai đoạn</th>
-                <th>Trạng thái</th>
-                <th>Deadline</th>
-                <th>Người thực hiện</th>
-                <th>Tổ chuyên môn</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var congViec in Model.CongViecs)
-            {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => congViec.TenCongViec)</td>
-                    <td>@Html.DisplayFor(modelItem => congViec.GiaiDoan)</td>
-                    <td>@Html.DisplayFor(modelItem => congViec.TrangThai)</td>
-                    <td>@Html.DisplayFor(modelItem => congViec.Deadline)</td>
-                    <td>@Html.DisplayFor(modelItem => congViec.MaNguoiDungNavigation.HoTen)</td>
-                    <td>@Html.DisplayFor(modelItem => congViec.MaToNavigation.TenTo)</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>Chưa có công việc nào cho dự án này.</p>
-}
-    <p>
-@if (isManager)
-{
-
-        <a asp-controller="CongViec" asp-action="Index" asp-route-maDuAn="@Model.MaDuAn" class="btn btn-primary">Quản lý công việc</a>
-        <a asp-action="Edit" asp-route-id="@Model.MaDuAn" class="btn btn-warning">Sửa</a>
-   
-}
-    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-</p>
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

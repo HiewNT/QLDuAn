@@ -1,344 +1,182 @@
-﻿@{
-    ViewData["Title"] = "Bảng điều khiển quản trị";
-    var duAnProgress = ViewBag.DuAnProgress as IEnumerable<dynamic>;
-    var toCongViec = ViewBag.ToCongViec as IEnumerable<dynamic>;
-}
-
-<div class="container-fluid">
-    <!-- Header Section with Breadcrumb -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent p-0 mb-2">
-                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Trang chủ</a></li>
-                    <li class="breadcrumb-item active">Dashboard</li>
-                </ol>
-            </nav>
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h2 mb-0 text-dark fw-bold">
-                        <i class="bi bi-speedometer2 me-2 text-primary"></i>Bảng điều khiển
-                    </h1>
-                </div>
-            </div>
-            <div class="text-muted small mt-2">
-                <i class="bi bi-clock me-1"></i>Cập nhật lần cuối: <span id="lastUpdate">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row g-4 mb-5">
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="card border-0 shadow-sm h-100 stats-card" data-aos="fade-up" data-aos-delay="0">
-                <div class="card-body position-relative overflow-hidden">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="stats-icon bg-primary">
-                                <i class="bi bi-people fs-3"></i>
-                            </div>
-                        </div>
-                        <div class="ms-3 flex-grow-1">
-                            <h6 class="text-muted mb-1 text-uppercase small fw-semibold">Người dùng</h6>
-                            <h2 class="mb-0 fw-bold text-dark counter" data-target="@ViewBag.SoNguoiDung">0</h2>
-                        </div>
-                    </div>
-                    <div class="stats-bg-icon">
-                        <i class="bi bi-people"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="@Url.Action("Index", "NguoiDung")" class="btn btn-outline-primary btn-sm w-100">
-                        <i class="bi bi-arrow-right me-1"></i>Quản lý người dùng
-                    </a>
-                </div>
-            </div>
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng điều khiển quản trị</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="main-content">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">
+                <i class="fas fa-tachometer-alt"></i>
+                Bảng điều khiển quản trị
+            </h1>
+            <p class="dashboard-subtitle">Tổng quan hệ thống quản lý dự án</p>
         </div>
 
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="card border-0 shadow-sm h-100 stats-card" data-aos="fade-up" data-aos-delay="100">
-                <div class="card-body position-relative overflow-hidden">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="stats-icon bg-success">
-                                <i class="bi bi-folder-fill fs-3"></i>
-                            </div>
-                        </div>
-                        <div class="ms-3 flex-grow-1">
-                            <h6 class="text-muted mb-1 text-uppercase small fw-semibold">Dự án</h6>
-                            <h2 class="mb-0 fw-bold text-dark counter" data-target="@ViewBag.SoDuAn">0</h2>
-                        </div>
-                    </div>
-                    <div class="stats-bg-icon">
-                        <i class="bi bi-folder-fill"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="@Url.Action("Index", "DuAn")" class="btn btn-outline-success btn-sm w-100">
-                        <i class="bi bi-arrow-right me-1"></i>Quản lý dự án
-                    </a>
-                </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users"><i class="fas fa-users"></i></div>
+                <div class="stat-number">@ViewBag.SoNguoiDung</div>
+                <div class="stat-label">Người dùng</div>
+                <a href="@Url.Action("Index", "NguoiDung")" class="action-link">
+                    <i class="fas fa-arrow-right"></i> Quản lý người dùng
+                </a>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon projects"><i class="fas fa-folder"></i></div>
+                <div class="stat-number">@ViewBag.SoDuAn</div>
+                <div class="stat-label">Dự án</div>
+                <a href="@Url.Action("Index", "DuAn")" class="action-link">
+                    <i class="fas fa-arrow-right"></i> Quản lý dự án
+                </a>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon tasks"><i class="fas fa-clipboard-list"></i></div>
+                <div class="stat-number">@ViewBag.SoCongViec</div>
+                <div class="stat-label">Công việc</div>
+                <a href="@Url.Action("Index", "CongViec")" class="action-link">
+                    <i class="fas fa-arrow-right"></i> Quản lý công việc
+                </a>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon documents"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-number">@ViewBag.SoTaiLieu</div>
+                <div class="stat-label">Tài liệu</div>
+                <a href="@Url.Action("Index", "TaiLieu")" class="action-link">
+                    <i class="fas fa-arrow-right"></i> Quản lý tài liệu
+                </a>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon teams"><i class="fas fa-users-cog"></i></div>
+                <div class="stat-number">@ViewBag.SoTo</div>
+                <div class="stat-label">Tổ chuyên môn</div>
+                <a href="@Url.Action("Index", "ToChuyenMon")" class="action-link">
+                    <i class="fas fa-arrow-right"></i> Quản lý tổ chuyên môn
+                </a>
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="card border-0 shadow-sm h-100 stats-card" data-aos="fade-up" data-aos-delay="200">
-                <div class="card-body position-relative overflow-hidden">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="stats-icon bg-warning">
-                                <i class="bi bi-list-check fs-3"></i>
-                            </div>
-                        </div>
-                        <div class="ms-3 flex-grow-1">
-                            <h6 class="text-muted mb-1 text-uppercase small fw-semibold">Công việc</h6>
-                            <h2 class="mb-0 fw-bold text-dark counter" data-target="@ViewBag.SoCongViec">0</h2>
-                        </div>
-                    </div>
-                    <div class="stats-bg-icon">
-                        <i class="bi bi-list-check"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="@Url.Action("Index", "CongViec")" class="btn btn-outline-warning btn-sm w-100">
-                        <i class="bi bi-arrow-right me-1"></i>Quản lý công việc
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="card border-0 shadow-sm h-100 stats-card" data-aos="fade-up" data-aos-delay="300">
-                <div class="card-body position-relative overflow-hidden">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="stats-icon bg-info">
-                                <i class="bi bi-file-earmark-text-fill fs-3"></i>
-                            </div>
-                        </div>
-                        <div class="ms-3 flex-grow-1">
-                            <h6 class="text-muted mb-1 text-uppercase small fw-semibold">Tài liệu</h6>
-                            <h2 class="mb-0 fw-bold text-dark counter" data-target="@ViewBag.SoTaiLieu">0</h2>
-                        </div>
-                    </div>
-                    <div class="stats-bg-icon">
-                        <i class="bi bi-file-earmark-text-fill"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="@Url.Action("Index", "TaiLieu")" class="btn btn-outline-info btn-sm w-100">
-                        <i class="bi bi-arrow-right me-1"></i>Quản lý tài liệu
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content Row -->
-    <div class="row g-4 mb-4">
-        <!-- Quick Actions -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm h-100" data-aos="fade-right">
-                <div class="card-header bg-transparent border-0 pb-0">
-                    <h5 class="card-title mb-0 d-flex align-items-center">
-                        <i class="bi bi-lightning-fill text-primary me-2"></i>Thao tác nhanh
+        <div class="content-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-lightning-fill text-primary"></i> Thao tác nhanh
                     </h5>
                     <small class="text-muted">Các tác vụ thường dùng</small>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-3">
-                        <a href="@Url.Action("Create", "DuAn")" class="btn btn-light border p-3 text-start quick-action-btn">
-                            <div class="d-flex align-items-center">
-                                <div class="quick-action-icon bg-success-subtle text-success me-3">
-                                    <i class="bi bi-plus-circle"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">Tạo dự án mới</div>
-                                    <small class="text-muted">Khởi tạo dự án và phân công</small>
-                                </div>
+                    <div class="quick-actions-grid">
+                        <a href="@Url.Action("Create", "DuAn")" class="quick-action-btn">
+                            <div class="quick-action-icon bg-success-subtle text-success"><i class="bi bi-plus-circle"></i></div>
+                            <div class="quick-action-text">
+                                <div class="fw-semibold">Tạo dự án mới</div>
+                                <small class="text-muted">Khởi tạo dự án</small>
                             </div>
                         </a>
-                        
-                        <a href="@Url.Action("Create", "CongViec")" class="btn btn-light border p-3 text-start quick-action-btn">
-                            <div class="d-flex align-items-center">
-                                <div class="quick-action-icon bg-warning-subtle text-warning me-3">
-                                    <i class="bi bi-plus-circle"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">Thêm công việc</div>
-                                    <small class="text-muted">Tạo task và gán người thực hiện</small>
-                                </div>
+                        <a href="@Url.Action("Create", "CongViec")" class="quick-action-btn">
+                            <div class="quick-action-icon bg-warning-subtle text-warning"><i class="bi bi-plus-circle"></i></div>
+                            <div class="quick-action-text">
+                                <div class="fw-semibold">Thêm công việc</div>
+                                <small class="text-muted">Tạo task mới</small>
                             </div>
                         </a>
-                        
-                        <a href="@Url.Action("Create", "NguoiDung")" class="btn btn-light border p-3 text-start quick-action-btn">
-                            <div class="d-flex align-items-center">
-                                <div class="quick-action-icon bg-primary-subtle text-primary me-3">
-                                    <i class="bi bi-person-plus"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">Thêm người dùng</div>
-                                    <small class="text-muted">Mời thành viên tham gia</small>
-                                </div>
+                        <a href="@Url.Action("Create", "NguoiDung")" class="quick-action-btn">
+                            <div class="quick-action-icon bg-primary-subtle text-primary"><i class="bi bi-person-plus"></i></div>
+                            <div class="quick-action-text">
+                                <div class="fw-semibold">Thêm người dùng</div>
+                                <small class="text-muted">Mời thành viên</small>
                             </div>
                         </a>
-                        
-                        <a href="@Url.Action("Create", "TaiLieu")" class="btn btn-light border p-3 text-start quick-action-btn">
-                            <div class="d-flex align-items-center">
-                                <div class="quick-action-icon bg-info-subtle text-info me-3">
-                                    <i class="bi bi-cloud-upload"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">Upload tài liệu</div>
-                                    <small class="text-muted">Tải lên và chia sẻ file</small>
-                                </div>
+                        <a href="@Url.Action("Create", "TaiLieu")" class="quick-action-btn">
+                            <div class="quick-action-icon bg-info-subtle text-info"><i class="bi bi-cloud-upload"></i></div>
+                            <div class="quick-action-text">
+                                <div class="fw-semibold">Upload tài liệu</div>
+                                <small class="text-muted">Tải lên file</small>
                             </div>
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Project Progress Chart -->
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm h-100" data-aos="fade-left">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="card-title mb-0 d-flex align-items-center">
-                            <i class="bi bi-bar-chart text-success me-2"></i>Tiến độ dự án
-                        </h5>
-                        <small class="text-muted">Tình hình thực hiện các dự án</small>
-                    </div>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-three-dots"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="@Url.Action("Index", "DuAn")">Xem tất cả dự án</a></li>
-                            <li><a class="dropdown-item" href="#">Xuất báo cáo</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Cài đặt hiển thị</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="card-body">
-                    @if (duAnProgress != null && duAnProgress.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="border-0">Dự án</th>
-                                        <th class="border-0 text-center">Tổng CV</th>
-                                        <th class="border-0 text-center">Hoàn thành</th>
-                                        <th class="border-0">Tiến độ</th>
-                                        <th class="border-0 text-center">Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var d in duAnProgress)
-                                    {
-                                        var percentage = d.TongCV > 0 ? (int)((double)d.HoanThanh * 100 / d.TongCV) : 0;
-                                        var statusClass = percentage >= 80 ? "success" : percentage >= 50 ? "warning" : "danger";
-                                        var statusText = percentage >= 80 ? "Sắp hoàn thành" : percentage >= 50 ? "Đang thực hiện" : "Chậm tiến độ";
-                                        
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="project-avatar bg-primary-subtle text-primary rounded me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                                        @(d.TenDuAn.ToString().Substring(0, 1).ToUpper())
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-semibold">@d.TenDuAn</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-secondary-subtle text-secondary">@d.TongCV</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-success-subtle text-success">@d.HoanThanh</span>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                                        <div class="progress-bar bg-@statusClass" style="width: @percentage%"></div>
-                                                    </div>
-                                                    <small class="text-muted fw-semibold">@percentage%</small>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-@statusClass-subtle text-@statusClass">@statusText</span>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-4">
-                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-                            <p class="text-muted mt-2">Chưa có dự án nào</p>
-                            <a href="@Url.Action("Create", "DuAn")" class="btn btn-primary btn-sm">Tạo dự án đầu tiên</a>
-                        </div>
-                    }
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-tasks"></i>
+                    Chi tiết dự án
+                </h2>
+                <div class="table-responsive">
+                    <table class="table align-middle table-bordered text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên dự án</th>
+                                <th>Trạng thái</th>
+                                <th>Công việc</th>
+                                <th>Hoàn thành</th>
+                                <th>Tiến độ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var duAn in ViewBag.DuAnProgress)
+                            {
+                                var progressPercentage = duAn.TongCV > 0 ? Math.Round((double)duAn.HoanThanh / duAn.TongCV * 100) : 0;
+                                var statusClass = duAn.TrangThai switch
+                                {
+                                    "Đang thực hiện" => "warning",
+                                    "Hoàn thành" => "success",
+                                    "Chuẩn bị" => "secondary",
+                                    _ => "secondary"
+                                };
+                                <tr>
+                                    <td class="text-start">@duAn.TenDuAn</td>
+                                    <td>
+                                        <span class="badge bg-@statusClass">@duAn.TrangThai</span>
+                                    </td>
+                                    <td>@duAn.TongCV</td>
+                                    <td>@duAn.HoanThanh</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                <div class="progress-bar bg-@statusClass" role="progressbar" style="width: @progressPercentage%"></div>
+                                            </div>
+                                            <small class="text-muted fw-semibold">@progressPercentage%</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+
         </div>
-    </div>
-    
-</div>
+    </main>
 
-
-<link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
-<script>
-    // Animate counter number incrementally
-    function animateCounters() {
-        const counters = document.querySelectorAll('.counter');
-        counters.forEach(counter => {
-            const target = +counter.getAttribute('data-target');
-            let count = +counter.innerText;
-            const increment = Math.ceil(target / 100);
-
-            function updateCount() {
-                if (count < target) {
-                    count += increment;
-                    if (count > target) count = target;
-                    counter.innerText = count;
-                    setTimeout(updateCount, 20);
-                } else {
-                    counter.innerText = target;
-                }
-            }
-
-            updateCount();
-        });
-    }
-
-
-    // Init on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        animateCounters();
-
-        // Init AOS if loaded
-        if (typeof AOS !== 'undefined') {
-            AOS.init({
-                duration: 800,
-                once: true,
-                offset: 100
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Dashboard initialized');
+            document.querySelectorAll('.stat-card, .card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
             });
-        }
-
-        // Handle dropdown filter click
-        document.querySelectorAll('.dropdown-menu a').forEach(item => {
-            item.addEventListener('click', function (e) {
-                e.preventDefault();
-                const button = this.closest('.dropdown').querySelector('.dropdown-toggle');
-                button.innerHTML = `${this.textContent}`;
-                refreshData(); // Refresh when filter changes
+            document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.preventDefault();
+                    const action = btn.querySelector('.fw-semibold').textContent;
+                    btn.style.transform = 'scale(0.95)';
+                    setTimeout(() => btn.style.transform = 'scale(1)', 150);
+                    console.log(`Action clicked: ${action}`);
+                });
             });
         });
-    });
-</script>
+    </script>
+</body>
+</html>

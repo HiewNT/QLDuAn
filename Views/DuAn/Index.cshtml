@@ -3,49 +3,193 @@
 @{
     ViewData["Title"] = "Danh sách dự án";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var nguoiDungList = ViewBag.NguoiDungList as SelectList;
 }
 
-<h2>Danh sách dự án</h2>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">Dự án</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-0 text-dark fw-bold">
+                        <i class="bi bi-kanban me-2 text-primary"></i>Quản lý dự án
+                    </h1>
+                    <p class="text-muted small mt-2 mb-0">Quản lý danh sách dự án và phân công trong hệ thống</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <form asp-action="GenerateReport" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Xuất báo cáo
+                        </button>
+                    </form>
+
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Tạo dự án mới
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Tạo dự án mới</a>
-</p>
+    <!-- Filter Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <select class="form-select" id="trangThaiFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Chuẩn bị">Chuẩn bị</option>
+                        <option value="Đang thực hiện">Đang thực hiện</option>
+                        <option value="Hoàn thành">Hoàn thành</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    @Html.DropDownList("maNguoiPhuTrach", nguoiDungList, "Tất cả người phụ trách", new { @class = "form-select", id = "nguoiPhuTrachFilter" })
+                </div>
+            </div>
+        </div>
+    </div>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Tên dự án</th>
-            <th>Mô tả</th>
-            <th>Trạng thái</th>
-            <th>Người phụ trách</th>
-            <th>Ngày bắt đầu</th>
-            <th>Ngày kết thúc</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            var isManager = (ViewBag.UserRole == "Admin" || item.NguoiPhuTrach == ViewBag.UserId);
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.TenDuAn)</td>
-                <td>@Html.DisplayFor(modelItem => item.MoTa)</td>
-                <td>@Html.DisplayFor(modelItem => item.TrangThai)</td>
-                <td>@Html.DisplayFor(modelItem => item.NguoiPhuTrachNavigation.HoTen)</td>
-                <td>@Html.DisplayFor(modelItem => item.NgayBatDau)</td>
-                <td>@Html.DisplayFor(modelItem => item.NgayKetThuc)</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.MaDuAn" class="btn btn-success btn-sm">Chi Tiết</a>
-                    @if (isManager)
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.MaDuAn" class="btn btn-warning btn-sm">Sửa</a>
-                        <form asp-action="Delete" asp-route-id="@item.MaDuAn" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa dự án này?');">
-                            <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
-                    }
-                </td>
-            </tr>
+    <!-- Projects Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive p-3">
+                <table id="projectsTable" class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 ps-4">Tên dự án</th>
+                            <th class="border-0">Mô tả</th>
+                            <th class="border-0">Trạng thái</th>
+                            <th class="border-0">Người phụ trách</th>
+                            <th class="border-0">Bắt đầu</th>
+                            <th class="border-0">Kết thúc</th>
+                            <th class="border-0 text-end pe-4">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var isManager = (ViewBag.UserRole == "Admin" || item.NguoiPhuTrach == ViewBag.UserId);
+                            <tr>
+                                <td class="ps-4">
+                                        <div>
+                                            <div class="fw-semibold">@(item.TenDuAn ?? "Chưa đặt tên")</div>
+                                        </div>
+                                </td>
+                                <td>@(item.MoTa?.Length > 50 ? item.MoTa.Substring(0, 50) + "..." : item.MoTa ?? "-")</td>
+                                <td>
+                                    <span class="badge bg-@(item.TrangThai == "Hoàn thành" ? "success" : item.TrangThai == "Đang thực hiện" ? "warning" : "secondary")-subtle text-@(item.TrangThai == "Hoàn thành" ? "success" : item.TrangThai == "Đang thực hiện" ? "warning" : "secondary")">
+                                        @Html.DisplayFor(modelItem => item.TrangThai)
+                                    </span>
+                                </td>
+                                <td>@Html.DisplayFor(modelItem => item.NguoiPhuTrachNavigation.HoTen)</td>
+                                <td>@(item.NgayBatDau?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                <td>@(item.NgayKetThuc?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@item.MaDuAn" class="btn btn-outline-info btn-sm">
+                                            <i class="bi bi-eye me-1"></i>Chi tiết
+                                        </a>
+                                        @if (isManager)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.MaDuAn" class="btn btn-outline-warning btn-sm ms-1">
+                                                <i class="bi bi-pencil me-1"></i>Sửa
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@item.MaDuAn" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm ms-1"
+                                                        onclick="return confirm('Bạn có chắc muốn xóa dự án này? Hành động này không thể hoàn tác.')">
+                                                    <i class="bi bi-trash me-1"></i>Xóa
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+        /* Table column widths */
+        #projectsTable th:nth-child(1), #projectsTable td:nth-child(1) { /* Tên dự án */
+            width: 12%;
         }
-    </tbody>
-</table>
+
+        #projectsTable th:nth-child(2), #projectsTable td:nth-child(2) { /* Mô tả */
+            width: 22%;
+        }
+
+        #projectsTable th:nth-child(3), #projectsTable td:nth-child(3) { /* Trạng thái */
+            width: 10%;
+            text-align: center;
+        }
+
+        #projectsTable th:nth-child(4), #projectsTable td:nth-child(4) { /* Người phụ trách */
+            width: 15%;
+        }
+
+        #projectsTable th:nth-child(5), #projectsTable td:nth-child(5) { /* Ngày bắt đầu */
+            width: 10%;
+            text-align: center;
+        }
+
+        #projectsTable th:nth-child(6), #projectsTable td:nth-child(6) { /* Ngày kết thúc */
+            width: 10%;
+            text-align: center;
+        }
+
+        #projectsTable th:nth-child(7), #projectsTable td:nth-child(7) { /* Hành động */
+            width: 20%;
+        }
+
+    </style>
+    <script>
+        $(document).ready(function () {
+            var table = $('#projectsTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm:",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Sau",
+                        "previous": "Trước"
+                    },
+                    "zeroRecords": "Không tìm thấy dữ liệu phù hợp"
+                }
+            });
+
+            // Custom filter for status
+            $('#trangThaiFilter').on('change', function () {
+                var val = $(this).val();
+                table.column(2).search(val === "" ? "" : val).draw();
+            });
+
+            // Custom filter for person in charge
+            $('#nguoiPhuTrachFilter').on('change', function () {
+                var val = $(this).find("option:selected").text();
+                table.column(3).search(val === "Tất cả người phụ trách" ? "" : val).draw();
+            });
+
+
+        });
+        });
+    </script>
+}

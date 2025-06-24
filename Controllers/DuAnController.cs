@@ -48,6 +48,7 @@ public class DuAnController : Controller
             .Include(d => d.NguoiPhuTrachNavigation)
             .ToListAsync();
 
+        ViewBag.NguoiDungList = new SelectList(_context.NguoiDungs, "MaNguoiDung", "HoTen");
         return View(duAns);
     }
 
@@ -64,12 +65,11 @@ public class DuAnController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(DuAn duAn)
     {
+        duAn.TrangThai ??= "Chuẩn bị"; // Đặt mặc định nếu chưa có
         _context.Add(duAn);
         await _context.SaveChangesAsync();
         TempData["SuccessMessage"] = "Tạo dự án thành công!";
-        
-        ViewBag.NguoiDungList = new SelectList(_context.NguoiDungs, "MaNguoiDung", "HoTen", duAn.NguoiPhuTrach);
-        ViewBag.TrangThaiList = new SelectList(new[] { "Chuẩn bị", "Đang thực hiện", "Hoàn thành" }, duAn.TrangThai);
+        ViewBag.NguoiDungList = new SelectList(_context.NguoiDungs, "MaNguoiDung", "HoTen", duAn.NguoiPhuTrach);;
         return RedirectToAction(nameof(Index));
     }
 
@@ -111,7 +111,7 @@ public class DuAnController : Controller
 
         ViewBag.NguoiDungList = new SelectList(_context.NguoiDungs, "MaNguoiDung", "HoTen", duAn.NguoiPhuTrach);
         ViewBag.TrangThaiList = new SelectList(new[] { "Chuẩn bị", "Đang thực hiện", "Hoàn thành" }, duAn.TrangThai);
-        return View(duAn);
+        return RedirectToAction(nameof(Index));
     }
 
     // POST: DuAn/Delete/5
@@ -166,5 +166,33 @@ public class DuAnController : Controller
         }
 
         return View(duAn);
+    }
+
+
+
+    [HttpPost]
+    public async Task<IActionResult> GenerateReport(int? id = null)
+    {
+        IQueryable<DuAn> query = _context.DuAns
+            .Include(d => d.NguoiPhuTrachNavigation)
+            .Include(d => d.CongViecs)
+                .ThenInclude(cv => cv.MaNguoiDungNavigation)
+            .Include(d => d.CongViecs)
+                .ThenInclude(cv => cv.MaToNavigation);
+        var time = DateTime.Now;
+        if (id.HasValue)
+        {
+            query = query.Where(d => d.MaDuAn == id.Value);
+        }
+
+        var duAns = await query.ToListAsync();
+
+        if (!duAns.Any())
+        {
+            return NotFound();
+        }
+
+        var pdfBytes = BaoCaoGenerator.GeneratePdf(duAns);
+        return File(pdfBytes, "application/pdf", $"BaoCao_DuAn_{(id.HasValue ? id.ToString() : "TatCa")}_{time}.pdf");
     }
 }

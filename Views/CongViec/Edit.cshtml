@@ -1,70 +1,118 @@
 ﻿@model QLDuAn.Models.CongViec
-
 @{
     ViewData["Title"] = "Chỉnh sửa công việc";
+    var duAnList = ViewBag.DuAnList as SelectList;
+    var nguoiDungList = ViewBag.NguoiDungList as SelectList;
+    var toList = ViewBag.ToList as SelectList;
 }
 
-<h2>Chỉnh sửa công việc</h2>
-
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="MaCongViec" />
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="form-group">
-        <label asp-for="MaDuAn" class="control-label">Dự án</label>
-        <select asp-for="MaDuAn" class="form-control" asp-items="ViewBag.DuAnList"></select>
-        <span asp-validation-for="MaDuAn" class="text-danger"></span>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Công việc</a></li>
+                    <li class="breadcrumb-item active">Chỉnh sửa</li>
+                </ol>
+            </nav>
+            <h2 class="h3 mb-0">Chỉnh sửa công việc</h2>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label asp-for="TenCongViec" class="control-label"></label>
-        <input asp-for="TenCongViec" class="form-control" />
-        <span asp-validation-for="TenCongViec" class="text-danger"></span>
-    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Edit" method="post" class="card shadow-sm">
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="MaCongViec" />
 
-    <div class="form-group">
-        <label asp-for="GiaiDoan" class="control-label"></label>
-        <select asp-for="GiaiDoan" class="form-control" asp-items="ViewBag.GiaiDoanList"></select>
-        <span asp-validation-for="GiaiDoan" class="text-danger"></span>
-    </div>
+                    <div class="mb-3">
+                        <label asp-for="TenCongViec" class="form-label required">Tên công việc</label>
+                        <input asp-for="TenCongViec" class="form-control" />
+                        <span asp-validation-for="TenCongViec" class="text-danger"></span>
+                    </div>
 
-    <div class="form-group">
-        <label asp-for="TrangThai" class="control-label"></label>
-        <select asp-for="TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList"></select>
-        <span asp-validation-for="TrangThai" class="text-danger"></span>
-    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="MaDuAn" class="form-label required">Dự án</label>
+                            <select asp-for="MaDuAn" asp-items="duAnList" class="form-select">
+                                <option value="">-- Chọn dự án --</option>
+                            </select>
+                            <span asp-validation-for="MaDuAn" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="GiaiDoan" class="form-label required">Giai Đoạn</label>
+                            <select asp-for="GiaiDoan" class="form-select">
+                                <option value="Tiền kỳ">Tiền kỳ</option>
+                                <option value="Sản xuất">Sản xuất</option>
+                                <option value="Hậu kỳ">Hậu kỳ</option>
+                            </select>
+                            <span asp-validation-for="GiaiDoan" class="text-danger"></span>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-        <label asp-for="Deadline" class="control-label"></label>
-        <input asp-for="Deadline" class="form-control" type="date" />
-        <span asp-validation-for="Deadline" class="text-danger"></span>
-    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="MaNguoiDung" class="form-label required">Người thực hiện</label>
+                            <select asp-for="MaNguoiDung" asp-items="nguoiDungList" class="form-select">
+                                <option value="">-- Chọn người thực hiện --</option>
+                            </select>
+                            <span asp-validation-for="MaNguoiDung" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="MaTo" class="form-label">Tổ chuyên môn</label>
+                            <select asp-for="MaTo" asp-items="toList" class="form-select">
+                                <option value="">-- Chọn tổ --</option>
+                            </select>
+                            <span asp-validation-for="MaTo" class="text-danger"></span>
+                        </div>
+                    </div>
 
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Deadline" class="form-label required">Deadline</label>
+                            <input asp-for="Deadline" type="date" class="form-control" />
+                            <span asp-validation-for="Deadline" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TrangThai" class="form-label">Trạng thái</label>
+                            <select asp-for="TrangThai" class="form-select">
+                                <option value="Chưa bắt đầu">Chưa bắt đầu</option>
+                                <option value="Đang làm">Đang làm</option>
+                                <option value="Hoàn thành">Hoàn thành</option>
+                                <option value="Trê hạn">Trễ hạn</option>
+                            </select>
+                            <span asp-validation-for="TrangThai" class="text-danger"></span>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-        <label asp-for="MaTo" class="control-label"></label>
-        <select asp-for="MaTo" class="form-control" asp-items="ViewBag.ToChuyenMonList">
-            <option value="">-- Chọn tổ chuyên môn --</option>
-        </select>
-        <span asp-validation-for="MaTo" class="text-danger"></span>
-    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="MaNguoiDung" class="control-label"></label>
-        <select asp-for="MaNguoiDung" class="form-control" asp-items="ViewBag.NguoiDungList">
-            <option value="">-- Chọn người thực hiện --</option>
-        </select>
-        <span asp-validation-for="MaNguoiDung" class="text-danger"></span>
     </div>
+</div>
 
-    <div class="form-group">
-        <input type="submit" value="Lưu" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-    </div>
-</form>
+@section Styles {
+    <style>
+        .required:after {
+            content: " *";
+            color: red;
+        }
+    </style>
+}
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

@@ -1,65 +1,159 @@
 ﻿@model QLDuAn.Models.CongViec
-
 @{
     ViewData["Title"] = "Chi tiết công việc";
     var isManager = (ViewBag.UserRole == "Admin" || Model.MaDuAnNavigation?.NguoiPhuTrach == ViewBag.UserId);
 }
 
-<h2>Chi tiết công việc</h2>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Công việc</a></li>
+                    <li class="breadcrumb-item active">Chi tiết</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="h3 mb-0">@Model.TenCongViec</h2>
+                <div>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Quay lại
+                    </a>
+                    @if (isManager)
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.MaCongViec" class="btn btn-primary ms-2">
+                            <i class="bi bi-pencil me-1"></i>Sửa
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="card mb-4">
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">Tên công việc</dt>
-            <dd class="col-sm-9">@Model.TenCongViec</dd>
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Thông tin chính -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Thông tin công việc</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">Dự án</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-primary-subtle text-primary">
+                                @Model.MaDuAnNavigation?.TenDuAn
+                            </span>
+                        </dd>
 
-            <dt class="col-sm-3">Dự án</dt>
-            <dd class="col-sm-9">@Model.MaDuAnNavigation?.TenDuAn</dd>
+                        <dt class="col-sm-3">Giai đoạn</dt>
+                        <dd class="col-sm-9">@Model.GiaiDoan</dd>
 
-            <dt class="col-sm-3">Giai đoạn</dt>
-            <dd class="col-sm-9">@Model.GiaiDoan</dd>
+                        <dt class="col-sm-3">Trạng thái</dt>
+                        <dd class="col-sm-9">
+                            @switch (Model.TrangThai)
+                            {
+                                case "Chưa bắt đầu":
+                                    <span class="badge bg-secondary-subtle text-secondary">
+                                        <i class="bi bi-hourglass-split me-1"></i>Chưa bắt đầu
+                                    </span>
+                                    break;
+                                case "Đang làm":
+                                    <span class="badge bg-primary-subtle text-primary">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Đang làm
+                                    </span>
+                                    break;
+                                case "Hoàn thành":
+                                    <span class="badge bg-success-subtle text-success">
+                                        <i class="bi bi-check-circle me-1"></i>Hoàn thành
+                                    </span>
+                                    break;
+                                case "Trễ hạn":
+                                    <span class="badge bg-danger-subtle text-danger">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>Trễ hạn
+                                    </span>
+                                    break;
+                            }
+                        </dd>
 
-            <dt class="col-sm-3">Trạng thái</dt>
-            <dd class="col-sm-9">@Model.TrangThai</dd>
+                        <dt class="col-sm-3">Deadline</dt>
+                        <dd class="col-sm-9">@Model.Deadline?.ToString("dd/MM/yyyy")</dd>
 
-            <dt class="col-sm-3">Deadline</dt>
-            <dd class="col-sm-9">@Model.Deadline?.ToString("dd/MM/yyyy")</dd>
+                        <dt class="col-sm-3">Người thực hiện</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-info-subtle text-info">
+                                <i class="bi bi-person me-1"></i>@Model.MaNguoiDungNavigation?.HoTen
+                            </span>
+                        </dd>
 
-            <dt class="col-sm-3">Người thực hiện</dt>
-            <dd class="col-sm-9">@Model.MaNguoiDungNavigation?.HoTen</dd>
+                        <dt class="col-sm-3">Tổ chuyên môn</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-warning-subtle text-warning">
+                                <i class="bi bi-people me-1"></i>@Model.MaToNavigation?.TenTo
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
 
-            <dt class="col-sm-3">Tổ chuyên môn</dt>
-            <dd class="col-sm-9">@Model.MaToNavigation?.TenTo</dd>
-        </dl>
+        <div class="col-md-4">
+            <!-- Tài liệu liên quan -->
+            @if (Model.TaiLieus != null && Model.TaiLieus.Any())
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-file-earmark-text me-2"></i>Tài liệu liên quan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var tl in Model.TaiLieus)
+                            {
+                                <li class="mb-2">
+                                    <i class="bi bi-file-earmark me-2"></i>@tl.TenTaiLieu
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+            <!-- Bình luận -->
+            @if (Model.BinhLuans != null && Model.BinhLuans.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-chat-dots me-2"></i>Bình luận
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var bl in Model.BinhLuans.OrderByDescending(b => b.NgayTao))
+                        {
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0">
+                                    <div class="avatar-circle bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 32px; height: 32px; font-size: 12px;">
+                                        @(bl.MaNguoiDungNavigation?.HoTen?.Substring(0, 1))
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex align-items-center">
+                                        <h6 class="mb-0">@bl.MaNguoiDungNavigation?.HoTen</h6>
+                                        <small class="text-muted ms-2">
+                                            @bl.NgayTao?.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                    </div>
+                                    <p class="mb-0">@bl.NoiDung</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 </div>
-
-@if (Model.TaiLieus != null && Model.TaiLieus.Any())
-{
-    <h5>Tài liệu liên quan</h5>
-    <ul>
-        @foreach (var tl in Model.TaiLieus)
-        {
-            <li>@tl.TenTaiLieu</li>
-        }
-    </ul>
-}
-
-@if (Model.BinhLuans != null && Model.BinhLuans.Any())
-{
-    <h5>Bình luận</h5>
-    <ul>
-        @foreach (var bl in Model.BinhLuans.OrderByDescending(b => b.NgayTao))
-        {
-            <li>
-                <strong>@bl.MaNguoiDungNavigation?.HoTen</strong> (@bl.NgayTao?.ToString("dd/MM/yyyy HH:mm")): @bl.NoiDung
-            </li>
-        }
-    </ul>
-}
-
-<a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
-@if (isManager)
-{
-<a asp-action="Edit" asp-route-id="@Model.MaCongViec" class="btn btn-primary">Sửa</a>
-}

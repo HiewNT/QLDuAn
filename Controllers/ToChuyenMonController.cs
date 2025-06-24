@@ -130,13 +130,16 @@ namespace QLDuAn.Controllers
                 return NotFound();
             }
 
-            var nguoiDungs = await _context.NguoiDungs
-                .Where(n => n.MaTo == null)
+            ViewBag.AllToChuyenMon = _context.ToChuyenMons.ToList(); // KHÔNG để null
+            var allUsers = await _context.NguoiDungs.ToListAsync();
+            var assignedUserIds = await _context.NguoiDungs
+                .Where(n => n.MaTo == id)
+                .Select(n => n.MaNguoiDung)
                 .ToListAsync();
 
-            ViewBag.ToChuyenMon = toChuyenMon;
-            ViewBag.NguoiDungList = new SelectList(nguoiDungs, "MaNguoiDung", "HoTen");
-            return View();
+            ViewBag.AllUsers = allUsers;
+            ViewBag.AssignedUserIds = assignedUserIds;
+            return View(toChuyenMon);
         }
 
         // POST: ToChuyenMon/AssignMembers/5

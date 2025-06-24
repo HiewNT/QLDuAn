@@ -1,59 +1,106 @@
 ﻿@model QLDuAn.Models.DuAn
-
 @{
     ViewData["Title"] = "Tạo dự án mới";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    var toList = ViewBag.ToList as SelectList;
+    var nguoiPhuTrachList = ViewBag.NguoiDungList as SelectList;
 }
 
-<h2>Tạo dự án mới</h2>
-
-<form asp-action="Create" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="form-group">
-        <label asp-for="TenDuAn" class="control-label"></label>
-        <input asp-for="TenDuAn" class="form-control" />
-        <span asp-validation-for="TenDuAn" class="text-danger"></span>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Dự án</a></li>
+                    <li class="breadcrumb-item active">Tạo mới</li>
+                </ol>
+            </nav>
+            <h2 class="h3 mb-0">Tạo dự án mới</h2>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label asp-for="MoTa" class="control-label"></label>
-        <textarea asp-for="MoTa" class="form-control"></textarea>
-        <span asp-validation-for="MoTa" class="text-danger"></span>
-    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Create" method="post" class="card shadow-sm">
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <div class="form-group">
-        <label asp-for="TrangThai" class="control-label"></label>
-        <select asp-for="TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList"></select>
-        <span asp-validation-for="TrangThai" class="text-danger"></span>
-    </div>
+                    <div class="mb-3">
+                        <label asp-for="TenDuAn" class="form-label required">Tên dự án</label>
+                        <input asp-for="TenDuAn" class="form-control" />
+                        <span asp-validation-for="TenDuAn" class="text-danger"></span>
+                    </div>
 
-    <div class="form-group">
-        <label asp-for="NguoiPhuTrach" class="control-label"></label>
-        <select asp-for="NguoiPhuTrach" class="form-control" asp-items="ViewBag.NguoiDungList"></select>
-        <span asp-validation-for="NguoiPhuTrach" class="text-danger"></span>
-    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="NguoiPhuTrach" class="form-label required">Người phụ trách</label>
+                            <select asp-for="NguoiPhuTrach" asp-items="nguoiPhuTrachList" class="form-select">
+                                <option value="">-- Chọn người phụ trách --</option>
+                            </select>
+                            <span asp-validation-for="NguoiPhuTrach" class="text-danger"></span>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-        <label asp-for="NgayBatDau" class="control-label"></label>
-        <input asp-for="NgayBatDau" class="form-control" type="date" />
-        <span asp-validation-for="NgayBatDau" class="text-danger"></span>
-    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="NgayBatDau" class="form-label required">Ngày bắt đầu</label>
+                            <input asp-for="NgayBatDau" type="date" class="form-control" />
+                            <span asp-validation-for="NgayBatDau" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NgayKetThuc" class="form-label required">Ngày kết thúc</label>
+                            <input asp-for="NgayKetThuc" type="date" class="form-control" />
+                            <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-        <label asp-for="NgayKetThuc" class="control-label"></label>
-        <input asp-for="NgayKetThuc" class="form-control" type="date" />
-        <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
-    </div>
+                    <div class="mb-3">
+                        <label asp-for="MoTa" class="form-label">Mô tả</label>
+                        <textarea asp-for="MoTa" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="MoTa" class="text-danger"></span>
+                    </div>
 
-    <div class="form-group">
-        <input type="submit" value="Tạo" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+                    <div class="mb-3">
+                        <label asp-for="TrangThai" class="form-label">Trạng thái</label>
+                        <input asp-for="TrangThai" class="form-control" value="Chuẩn bị" readonly />
+                        <span asp-validation-for="TrangThai" class="text-danger"></span>
+                    </div>
+
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Lưu
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Hướng dẫn
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Vui lòng điền đầy đủ các thông tin được đánh dấu <span class="text-danger">*</span></p>
+                    <ul class="mb-0">
+                        <li>Nhập tên dự án và mô tả chi tiết</li>
+                        <li>Chọn tổ chuyên môn phụ trách</li>
+                        <li>Phân công người phụ trách dự án</li>
+                        <li>Đặt thời gian bắt đầu và kết thúc</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-</form>
+</div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

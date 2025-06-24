@@ -1,29 +1,90 @@
 ﻿@model QLDuAn.Models.ToChuyenMon
-
 @{
-    ViewData["Title"] = "Gán nhân sự vào tổ";
-    var toChuyenMon = ViewBag.ToChuyenMon as QLDuAn.Models.ToChuyenMon;
+    ViewData["Title"] = "Gán nhân sự cho tổ";
+    // Lấy danh sách tất cả người dùng
+    var allUsers = ViewBag.AllUsers as List<QLDuAn.Models.NguoiDung>;
+    // Lấy danh sách ID người dùng đã thuộc tổ này
+    var assignedUserIds = ViewBag.AssignedUserIds as List<int>;
+
+    var allToChuyenMon = ViewBag.AllToChuyenMon as List<QLDuAn.Models.ToChuyenMon>;
 }
 
-<h2>Gán nhân sự - @toChuyenMon.TenTo</h2>
-
-<form asp-action="AssignMembers" method="post">
-    <input type="hidden" name="id" value="@toChuyenMon.MaTo" />
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="form-group">
-        <label class="control-label">Chọn nhân sự</label>
-        <select name="maNguoiDungs" class="form-control" multiple asp-items="ViewBag.NguoiDungList"></select>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Tổ chuyên môn</a></li>
+                    <li class="breadcrumb-item active">Gán nhân sự</li>
+                </ol>
+            </nav>
+            <h2 class="h3 mb-0">Gán nhân sự cho tổ: <span class="text-primary">@Model.TenTo</span></h2>
+        </div>
     </div>
 
-    <div class="form-group">
-        <input type="submit" value="Lưu" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-    </div>
-</form>
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="AssignMembers" method="post" class="card shadow-sm">
+                <div class="card-body">
+                    <input type="hidden" asp-for="MaTo" value="@Model.MaTo" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Chọn nhân sự cho tổ</label>
+                        <select name="maNguoiDungs" class="form-select" multiple size="12">
+                            @foreach (var user in allUsers)
+                            {
+                                // Bỏ qua người đã thuộc tổ này
+                                if (assignedUserIds != null && assignedUserIds.Contains(user.MaNguoiDung))
+                                {
+                                    continue;
+                                }
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
+                                string toKhac = "";
+                                if (user.MaTo != null && user.MaTo != Model.MaTo)
+                                {
+                                    var toDangThuoc = allToChuyenMon.FirstOrDefault(t => t.MaTo == user.MaTo);
+                                    if (toDangThuoc != null)
+                                    {
+                                        toKhac = $" - Thuộc: {toDangThuoc.TenTo}";
+                                    }
+                                }
+
+                                <option value="@user.MaNguoiDung">@user.HoTen (@user.Email) @toKhac</option>
+                            }
+                        </select>
+
+
+
+                        <div class="form-text">Giữ Ctrl (hoặc Cmd trên Mac) để chọn nhiều người.</div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Hướng dẫn
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Chọn một hoặc nhiều nhân sự để thêm vào tổ.</li>
+                        <li>Những người đã thuộc tổ sẽ được chọn sẵn.</li>
+                        <li>Nhấn <b>Lưu thay đổi</b> để cập nhật danh sách thành viên.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

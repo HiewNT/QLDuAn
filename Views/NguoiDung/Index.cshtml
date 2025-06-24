@@ -1,46 +1,189 @@
 ﻿@model IEnumerable<QLDuAn.Models.NguoiDung>
 @{
-    ViewData["Title"] = "Danh sách người dùng";
+    ViewData["Title"] = "Quản lý người dùng";
+    var vaiTroList = ViewBag.VaiTroList as SelectList;
+        var toList = ViewBag.ToList as SelectList;
+
 }
-<h2>@ViewData["Title"]</h2>
-<a asp-action="Create" class="btn btn-primary mb-3">Tạo tài khoản</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Họ tên</th>
-            <th>Email</th>
-            <th>Vai trò</th>
-            <th>Tổ</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.HoTen</td>
-                <td>@item.Email</td>
-                <td>@item.MaVaiTroNavigation?.TenVaiTro</td>
-                <td>@item.MaToNavigation?.TenTo</td>
-                <td>@(item.TrangThai == true ? "✓" : "✗")</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.MaNguoiDung" class="btn btn-sm btn-warning">Sửa</a>
-                    <form asp-action="Delete" method="post" style="display:inline">
-                        <input type="hidden" name="id" value="@item.MaNguoiDung" />
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Xác nhận xóa?')">Xóa</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-<script>
-    document.querySelectorAll('button[type="submit"]').forEach(button => {
-        button.addEventListener('click', function(e) {
-            if (!confirm('Xác nhận xóa?')) {
-                e.preventDefault();
-            }
+
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">Người dùng</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-0 text-dark fw-bold">
+                        <i class="bi bi-people me-2 text-primary"></i>Quản lý người dùng
+                    </h1>
+                    <p class="text-muted small mt-2 mb-0">Quản lý thông tin và phân quyền người dùng trong hệ thống</p>
+                </div>
+                <div>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Thêm người dùng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    @Html.DropDownList("toFilter", toList, "Tất cả tổ", new { @class = "form-select", id = "toFilter" })
+                </div>
+                <div class="col-md-3">
+                    @Html.DropDownList("roleFilter", vaiTroList, "Tất cả vai trò", new { @class = "form-select", id = "roleFilter" })
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="true">Đang hoạt động</option>
+                        <option value="false">Không hoạt động</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive p-3">
+                <table id="usersTable" class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 ps-4">Người dùng</th>
+                            <th class="border-0">Vai trò</th>
+                            <th class="border-0">Tổ chuyên môn</th>
+                            <th class="border-0">Trạng thái</th>
+                            <th class="border-0 text-end pe-4">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                                             style="width: 40px; height: 40px;">
+                                            @{
+                                                var hoTen = item.HoTen ?? "";
+                                                var lastChar = hoTen.Trim().Length > 0 ? hoTen.Trim().Split(' ').Last()[0].ToString().ToUpper() : "";
+                                            }
+                                            @(lastChar)
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">@item.HoTen</div>
+                                            <div class="text-muted small">@item.Email</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary">
+                                        @(item.MaVaiTroNavigation?.TenVaiTro ?? "Chưa phân quyền")
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info-subtle text-info">
+                                        @(item.MaToNavigation?.TenTo ?? "Chưa phân tổ")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (item.TrangThai == true)
+                                    {
+                                        <span class="badge bg-success-subtle text-success">
+                                            <i class="bi bi-check-circle me-1"></i>Đang hoạt động
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger">
+                                            <i class="bi bi-x-circle me-1"></i>Không hoạt động
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <!-- Nút Chi tiết -->
+                                    <a asp-action="Details" asp-route-id="@item.MaNguoiDung" class="btn btn-outline-info btn-sm">
+                                        <i class="bi bi-eye me-1"></i>Chi tiết
+                                    </a>
+
+                                        <!-- Nút Sửa -->
+                                        <a asp-action="Edit" asp-route-id="@item.MaNguoiDung"
+                                           class="btn btn-outline-warning btn-sm" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil-square me-1"></i>Sửa
+                                        </a>
+
+                                        <!-- Nút Xóa -->
+                                        <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa người dùng này?');">
+                                            <input type="hidden" name="id" value="@item.MaNguoiDung" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa người dùng">
+                                                <i class="bi bi-trash me-1"></i>Xóa
+                                            </button>
+                                        </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var table = $('#usersTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm:",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Sau",
+                        "previous": "Trước"
+                    },
+                    "zeroRecords": "Không tìm thấy dữ liệu phù hợp"
+                }
+            });
+
+            // Custom filter for role
+            $('#roleFilter').on('change', function () {
+                var val = $(this).find("option:selected").text();
+                table.column(1).search(val === "Tất cả vai trò" ? "" : val).draw();
+            });
+
+            // Custom filter for to
+            $('#toFilter').on('change', function () {
+                var val = $(this).find("option:selected").text();
+                table.column(2).search(val === "Tất cả tổ" ? "" : val).draw();
+            });
+
+            // Custom filter for status
+            $('#statusFilter').on('change', function () {
+                var val = $(this).val();
+                if (val === "") {
+                    table.column(3).search("").draw();
+                } else if (val === "true") {
+                    table.column(3).search("Đang hoạt động").draw();
+                } else {
+                    table.column(3).search("Không hoạt động").draw();
+                }
+            });
+
         });
-    });
-</script>
+        });
+    </script>
+}

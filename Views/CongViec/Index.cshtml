@@ -2,64 +2,240 @@
 
 @{
     ViewData["Title"] = "Danh sách công việc";
+    var duAnList = ViewBag.DuAnList as SelectList;
+    var toList = ViewBag.ToList as SelectList;
 }
 
-<h2>Danh sách công việc</h2>
-<p>
-    <a asp-action="Create" class="btn btn-primary">Tạo công việc mới</a>
-</p>
-<div class="mb-3">
-    <form asp-action="Index" method="get">
-        <div class="form-group">
-            <label for="maDuAn">Lọc theo dự án:</label>
-            <select id="maDuAn" name="maDuAn" class="form-control d-inline-block w-auto" onchange="this.form.submit()">
-                <option value="" selected="@(string.IsNullOrEmpty(Context.Request.Query["maDuAn"]) ? "selected" : null)">-- Tất cả dự án --</option>
-                @foreach (var item in ViewBag.DuAnList as SelectList)
-                {
-                    <option value="@item.Value" selected="@(item.Value == Context.Request.Query["maDuAn"].ToString() ? "selected" : null)">@item.Text</option>
-                }
-            </select>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">Công việc</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-0 text-dark fw-bold">
+                        <i class="bi bi-list-task me-2 text-primary"></i>Quản lý công việc
+                    </h1>
+                    <p class="text-muted small mt-2 mb-0">Quản lý danh sách công việc và phân công trong hệ thống</p>
+                </div>
+                <div>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Tạo công việc mới
+                    </a>
+                </div>
+            </div>
         </div>
-    </form>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    @Html.DropDownList("maDuAn", duAnList, "Tất cả dự án", new { @class = "form-select", id = "duAnFilter" })
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="trangThaiFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Chưa bắt đầu">Chưa bắt đầu</option>
+                        <option value="Đang làm">Đang làm</option>
+                        <option value="Hoàn thành">Hoàn thành</option>
+                        <option value="Trễ hạn">Trễ hạn</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="giaiDoanFilter">
+                        <option value="">Tất cả gian đoạn</option>
+                        <option value="Tiền kỳ">Tiền kỳ</option>
+                        <option value="Sản xuất">Sản xuất</option>
+                        <option value="Hậu kỳ">Hậu kỳ</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    @Html.DropDownList("maTo", toList, "Tất cả tổ", new { @class = "form-select", id = "toFilter" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive p-3">
+                <table id="tasksTable" class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 ps-4">Dự án</th>
+                            <th class="border-0">Tên công việc</th>
+                            <th class="border-0">Giai đoạn</th>
+                            <th class="border-0">Trạng thái</th>
+                            <th class="border-0">Deadline</th>
+                            <th class="border-0">Thực hiện</th>
+                            <th class="border-0">Tổ</th>
+                            <th class="border-0 text-center pe-4">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var isManager = (ViewBag.UserRole == "Admin" || item.MaDuAnNavigation?.NguoiPhuTrach == ViewBag.UserId);
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <div class="fw-semibold">@(item.MaDuAnNavigation?.TenDuAn ?? "Chưa gán dự án")</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@Html.DisplayFor(modelItem => item.TenCongViec)</td>
+                                <td>@Html.DisplayFor(modelItem => item.GiaiDoan)</td>
+                                <td>
+                                    @switch (item.TrangThai)
+                                    {
+                                        case "Chưa bắt đầu":
+                                            <span class="badge bg-secondary-subtle text-secondary">
+                                                <i class="bi bi-hourglass-split me-1"></i>Chưa bắt đầu
+                                            </span>
+                                            break;
+                                        case "Đang làm":
+                                            <span class="badge bg-warning-subtle text-warning">
+                                                <i class="bi bi-arrow-repeat me-1"></i>Đang làm
+                                            </span>
+                                            break;
+                                        case "Hoàn thành":
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="bi bi-check-circle me-1"></i>Hoàn thành
+                                            </span>
+                                            break;
+                                        case "Trễ hạn":
+                                            <span class="badge bg-danger-subtle text-danger">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Trễ hạn
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@(item.Deadline?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                <td>@Html.DisplayFor(modelItem => item.MaNguoiDungNavigation.HoTen)</td>
+                                <td>
+                                    <span class="badge bg-info-subtle text-info">
+                                        @(item.MaToNavigation?.TenTo ?? "Chưa phân tổ")
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@item.MaCongViec" class="btn btn-outline-info btn-sm">
+                                            <i class="bi bi-eye me-1"></i>Chi tiết
+                                        </a>
+                                        @if (isManager)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.MaCongViec" class="btn btn-outline-warning btn-sm ms-1">
+                                                <i class="bi bi-pencil me-1"></i>Sửa
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@item.MaCongViec" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm ms-1"
+                                                        onclick="return confirm('Bạn có chắc muốn xóa công việc này? Hành động này không thể hoàn tác.')">
+                                                    <i class="bi bi-trash me-1"></i>Xóa
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+<style>
+    /* Table column widths */
+    #tasksTable th:nth-child(1), #tasksTable td:nth-child(1) { 
+        width: 13%;
+    }
 
+    #tasksTable th:nth-child(2), #tasksTable td:nth-child(2) { 
+        width: 14%;
+    }
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Dự án</th>
-            <th>Tên công việc</th>
-            <th>Giai đoạn</th>
-            <th>Trạng thái</th>
-            <th>Deadline</th>
-            <th>Người thực hiện</th>
-            <th>Tổ chuyên môn</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            var isManager = (ViewBag.UserRole == "Admin" || item.MaDuAnNavigation?.NguoiPhuTrach == ViewBag.UserId);
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.MaDuAnNavigation.TenDuAn)</td>
-                <td>@Html.DisplayFor(modelItem => item.TenCongViec)</td>
-                <td>@Html.DisplayFor(modelItem => item.GiaiDoan)</td>
-                <td>@Html.DisplayFor(modelItem => item.TrangThai)</td>
-                <td>@Html.DisplayFor(modelItem => item.Deadline)</td>
-                <td>@Html.DisplayFor(modelItem => item.MaNguoiDungNavigation.HoTen)</td>
-                <td>@Html.DisplayFor(modelItem => item.MaToNavigation.TenTo)</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.MaCongViec" class="btn btn-info btn-sm">Chi tiết</a>
-                    @if (isManager)
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.MaCongViec" class="btn btn-warning btn-sm">Sửa</a>
-                        <form asp-action="Delete" asp-route-id="@item.MaCongViec" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa?');">
-                            <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    #tasksTable th:nth-child(3), #tasksTable td:nth-child(3) { 
+        width: 10%;
+        text-align: center;
+    }
+
+    #tasksTable th:nth-child(4), #tasksTable td:nth-child(4) { 
+        width: 10%;
+    }
+
+    #tasksTable th:nth-child(5), #tasksTable td:nth-child(5) { 
+        width: 8%;
+        text-align: center;
+    }
+
+    #tasksTable th:nth-child(6), #tasksTable td:nth-child(6) {
+        width: 12%;
+        text-align: center;
+    }
+
+    #tasksTable th:nth-child(7), #tasksTable td:nth-child(7) { 
+        width: 10%;
+    }
+
+    #tasksTable th:nth-child(8), #tasksTable td:nth-child(8) { 
+        width: 23%;
+    }
+
+</style>
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <script>
+        $(document).ready(function () {
+            var table = $('#tasksTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm:",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Sau",
+                        "previous": "Trước"
+                    },
+                    "zeroRecords": "Không tìm thấy dữ liệu phù hợp"
+                }
+            });
+
+            // Custom filter for project
+            $('#duAnFilter').on('change', function () {
+                var val = $(this).find("option:selected").text();
+                table.column(0).search(val === "Tất cả dự án" ? "" : val).draw();
+            });
+
+            // Custom filter for status
+            $('#trangThaiFilter').on('change', function () {
+                var val = $(this).val();
+                table.column(3).search(val === "" ? "" : val).draw();
+            });
+
+            // Custom filter for status
+            $('#giaiDoanFilter').on('change', function () {
+                var val = $(this).val();
+                table.column(2).search(val === "" ? "" : val).draw();
+            });
+
+            // Custom filter for team
+            $('#toFilter').on('change', function () {
+                var val = $(this).find("option:selected").text();
+                table.column(6).search(val === "Tất cả tổ" ? "" : val).draw();
+            });
+
+        });
+        });
+    </script>
+}
