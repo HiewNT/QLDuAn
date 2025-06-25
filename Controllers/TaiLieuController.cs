@@ -1,18 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QLDuAn.Models;
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace QLDuAn.Controllers
 {
+    [Authorize]
     public class TaiLieuController : Controller
     {
         private readonly QlduAnContext _context;
+        private readonly int adminVaiTroId = 1; // Giả định MaVaiTro của Admin là 1
 
         public TaiLieuController(QlduAnContext context)
         {
@@ -22,12 +26,52 @@ namespace QLDuAn.Controllers
         // GET: TaiLieu/Index (Xem tất cả tài liệu, hoặc lọc theo maDuAn)
         public async Task<IActionResult> Index(int? maDuAn)
         {
+            // Lấy thông tin người dùng từ Claims
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value);
+
+            // Xây dựng truy vấn tài liệu
             var taiLieuQuery = _context.TaiLieus
                 .Include(t => t.MaDuAnNavigation)
                 .Include(t => t.MaCongViecNavigation)
                 .Include(t => t.NguoiUploadNavigation)
+                .Include(t => t.PhanQuyenTaiLieus)
+                .ThenInclude(p => p.MaVaiTroNavigation)
                 .AsQueryable();
 
+            if (userRole == "Admin")
+            {
+                // Admin: Xem tất cả tài liệu có quyền "Xem"
+                taiLieuQuery = taiLieuQuery.Where(t => t.PhanQuyenTaiLieus.Any(p => p.QuyenTruyCap == "Xem"));
+            }
+            else
+            {
+                // Lấy MaVaiTro của người dùng từ TenVaiTro
+                var userRoleId = await _context.VaiTros
+                    .Where(v => v.TenVaiTro == userRole)
+                    .Select(v => v.MaVaiTro)
+                    .FirstOrDefaultAsync();
+
+                // Lấy danh sách dự án mà người dùng phụ trách (Quản lý dự án)
+                var managedProjectIds = await _context.DuAns
+                    .Where(pc => pc.NguoiPhuTrach == userId)
+                    .Select(pc => pc.MaDuAn)
+                    .ToListAsync();
+
+                // Lấy danh sách công việc mà người dùng thực hiện
+                var assignedTaskIds = await _context.CongViecs
+                    .Where(pc => pc.MaNguoiDung == userId)
+                    .Select(pc => pc.MaCongViec)
+                    .ToListAsync();
+
+                // Lọc tài liệu: Quản lý dự án hoặc Nhân viên công việc
+                taiLieuQuery = taiLieuQuery.Where(t =>
+                    t.PhanQuyenTaiLieus.Any(p => p.MaVaiTro == userRoleId && p.QuyenTruyCap == "Xem") &&
+                    (managedProjectIds.Contains(t.MaDuAn) || (t.MaCongViec.HasValue && assignedTaskIds.Contains(t.MaCongViec.Value)))
+                );
+            }
+
+            // Lọc thêm theo maDuAn nếu có
             if (maDuAn.HasValue)
             {
                 taiLieuQuery = taiLieuQuery.Where(t => t.MaDuAn == maDuAn);
@@ -42,27 +86,27 @@ namespace QLDuAn.Controllers
         public IActionResult Create()
         {
             ViewBag.DuAnList = new SelectList(_context.DuAns, "MaDuAn", "TenDuAn");
-            ViewBag.CongViecList = new SelectList(_context.CongViecs, "MaCongViec", "TenCongViec");
-            ViewBag.VaiTroList = new SelectList(_context.VaiTros, "MaVaiTro", "TenVaiTro");
+            ViewBag.CongViecList = new SelectList(Enumerable.Empty<SelectListItem>());
+            ViewBag.VaiTroList = new SelectList(_context.VaiTros.Where(v => v.MaVaiTro != adminVaiTroId), "MaVaiTro", "TenVaiTro");
             return View();
         }
 
         // POST: TaiLieu/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int? maDuAn, int? maCongViec, IFormFile file, int[] vaiTroIds, string[] quyenTruyCaps)
+        public async Task<IActionResult> Create(int maDuAn, int? maCongViec, IFormFile file, int[] vaiTroIds, string[] quyenTruyCaps)
         {
             if (file == null || file.Length == 0)
             {
                 ModelState.AddModelError("", "Vui lòng chọn file để upload.");
             }
-            else if (maDuAn.HasValue && !_context.DuAns.Any(d => d.MaDuAn == maDuAn))
+            else if (!_context.DuAns.Any(d => d.MaDuAn == maDuAn))
             {
                 ModelState.AddModelError("maDuAn", "Dự án không tồn tại.");
             }
-            else if (maCongViec.HasValue && !_context.CongViecs.Any(c => c.MaCongViec == maCongViec))
+            else if (maCongViec.HasValue && !_context.CongViecs.Any(c => c.MaCongViec == maCongViec && c.MaDuAn == maDuAn))
             {
-                ModelState.AddModelError("maCongViec", "Công việc không tồn tại.");
+                ModelState.AddModelError("maCongViec", "Công việc không thuộc dự án đã chọn.");
             }
             else
             {
@@ -83,7 +127,7 @@ namespace QLDuAn.Controllers
                 {
                     TenTaiLieu = file.FileName,
                     FilePath = $"/uploads/{fileName}",
-                    MaDuAn = maDuAn.Value,
+                    MaDuAn = maDuAn,
                     MaCongViec = maCongViec,
                     NguoiUpload = 1, // Giả định người dùng đăng nhập
                     NgayUpload = DateTime.Now
@@ -92,28 +136,43 @@ namespace QLDuAn.Controllers
                 _context.TaiLieus.Add(taiLieu);
                 await _context.SaveChangesAsync();
 
-                // Lưu phân quyền
+                // Tự động gán tất cả quyền cho Admin
+                string[] allPermissions = { "Xem", "Tải", "Sửa", "Xóa" };
+                foreach (var permission in allPermissions)
+                {
+                    _context.PhanQuyenTaiLieus.Add(new PhanQuyenTaiLieu
+                    {
+                        MaTaiLieu = taiLieu.MaTaiLieu,
+                        MaVaiTro = adminVaiTroId,
+                        QuyenTruyCap = permission
+                    });
+                }
+
+                // Lưu phân quyền từ form (không bao gồm Admin)
                 if (vaiTroIds != null && quyenTruyCaps != null)
                 {
                     for (int i = 0; i < vaiTroIds.Length; i++)
                     {
-                        _context.PhanQuyenTaiLieus.Add(new PhanQuyenTaiLieu
+                        if (vaiTroIds[i] != 0) // Chỉ thêm nếu vaiTroId hợp lệ
                         {
-                            MaTaiLieu = taiLieu.MaTaiLieu,
-                            MaVaiTro = vaiTroIds[i],
-                            QuyenTruyCap = quyenTruyCaps[i]
-                        });
+                            _context.PhanQuyenTaiLieus.Add(new PhanQuyenTaiLieu
+                            {
+                                MaTaiLieu = taiLieu.MaTaiLieu,
+                                MaVaiTro = vaiTroIds[i],
+                                QuyenTruyCap = quyenTruyCaps[i]
+                            });
+                        }
                     }
-                    await _context.SaveChangesAsync();
                 }
 
+                await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Tạo tài liệu thành công!";
                 return RedirectToAction(nameof(Index));
             }
 
             ViewBag.DuAnList = new SelectList(_context.DuAns, "MaDuAn", "TenDuAn", maDuAn);
-            ViewBag.CongViecList = new SelectList(_context.CongViecs, "MaCongViec", "TenCongViec", maCongViec);
-            ViewBag.VaiTroList = new SelectList(_context.VaiTros, "MaVaiTro", "TenVaiTro");
+            ViewBag.CongViecList = new SelectList(_context.CongViecs.Where(c => c.MaDuAn == maDuAn), "MaCongViec", "TenCongViec", maCongViec);
+            ViewBag.VaiTroList = new SelectList(_context.VaiTros.Where(v => v.MaVaiTro != adminVaiTroId), "MaVaiTro", "TenVaiTro");
             return View();
         }
 
@@ -122,6 +181,7 @@ namespace QLDuAn.Controllers
         {
             var taiLieu = await _context.TaiLieus
                 .Include(t => t.PhanQuyenTaiLieus)
+                .ThenInclude(p => p.MaVaiTroNavigation)
                 .FirstOrDefaultAsync(t => t.MaTaiLieu == id);
             if (taiLieu == null)
             {
@@ -129,8 +189,8 @@ namespace QLDuAn.Controllers
             }
 
             ViewBag.DuAnList = new SelectList(_context.DuAns, "MaDuAn", "TenDuAn", taiLieu.MaDuAn);
-            ViewBag.CongViecList = new SelectList(_context.CongViecs, "MaCongViec", "TenCongViec", taiLieu.MaCongViec);
-            ViewBag.VaiTroList = new SelectList(_context.VaiTros, "MaVaiTro", "TenVaiTro");
+            ViewBag.CongViecList = new SelectList(_context.CongViecs.Where(c => c.MaDuAn == taiLieu.MaDuAn), "MaCongViec", "TenCongViec", taiLieu.MaCongViec);
+            ViewBag.VaiTroList = new SelectList(_context.VaiTros.Where(v => v.MaVaiTro != adminVaiTroId), "MaVaiTro", "TenVaiTro");
             return View(taiLieu);
         }
 
@@ -144,33 +204,48 @@ namespace QLDuAn.Controllers
                 return NotFound();
             }
 
-            
-                try
+            try
+            {
+                if (!_context.DuAns.Any(d => d.MaDuAn == taiLieu.MaDuAn))
                 {
-                    // Fix for CS0019: Operator '&&' cannot be applied to operands of type 'int' and 'bool'
-                    if (taiLieu.MaDuAn > 0 && !_context.DuAns.Any(d => d.MaDuAn == taiLieu.MaDuAn))
-                    {
-                        ModelState.AddModelError("MaDuAn", "Dự án không tồn tại.");
-                    }
-                    else if (taiLieu.MaCongViec.HasValue && !_context.CongViecs.Any(c => c.MaCongViec == taiLieu.MaCongViec))
-                    {
-                        ModelState.AddModelError("MaCongViec", "Công việc không tồn tại.");
-                    }
-                    else
-                    {
-                        // Cập nhật thông tin tài liệu
-                        _context.Update(taiLieu);
+                    ModelState.AddModelError("MaDuAn", "Dự án không tồn tại.");
+                }
+                else if (taiLieu.MaCongViec.HasValue && !_context.CongViecs.Any(c => c.MaCongViec == taiLieu.MaCongViec && c.MaDuAn == taiLieu.MaDuAn))
+                {
+                    ModelState.AddModelError("MaCongViec", "Công việc không thuộc dự án đã chọn.");
+                }
+                else
+                {
+                    // Cập nhật thông tin tài liệu
+                    _context.Update(taiLieu);
 
-                        // Xóa phân quyền cũ
-                        var oldPermissions = await _context.PhanQuyenTaiLieus
-                            .Where(p => p.MaTaiLieu == id)
-                            .ToListAsync();
-                        _context.PhanQuyenTaiLieus.RemoveRange(oldPermissions);
+                    // Xóa phân quyền cũ (không bao gồm Admin)
+                    var oldPermissions = await _context.PhanQuyenTaiLieus
+                        .Where(p => p.MaTaiLieu == id && p.MaVaiTro != adminVaiTroId)
+                        .ToListAsync();
+                    _context.PhanQuyenTaiLieus.RemoveRange(oldPermissions);
 
-                        // Thêm phân quyền mới
-                        if (vaiTroIds != null && quyenTruyCaps != null)
+                    // Thêm lại tất cả quyền cho Admin
+                    string[] allPermissions = { "Xem", "Tải", "Sửa", "Xóa" };
+                    foreach (var permission in allPermissions)
+                    {
+                        if (!_context.PhanQuyenTaiLieus.Any(p => p.MaTaiLieu == id && p.MaVaiTro == adminVaiTroId && p.QuyenTruyCap == permission))
                         {
-                            for (int i = 0; i < vaiTroIds.Length; i++)
+                            _context.PhanQuyenTaiLieus.Add(new PhanQuyenTaiLieu
+                            {
+                                MaTaiLieu = taiLieu.MaTaiLieu,
+                                MaVaiTro = adminVaiTroId,
+                                QuyenTruyCap = permission
+                            });
+                        }
+                    }
+
+                    // Thêm phân quyền mới từ form (không bao gồm Admin)
+                    if (vaiTroIds != null && quyenTruyCaps != null)
+                    {
+                        for (int i = 0; i < vaiTroIds.Length; i++)
+                        {
+                            if (vaiTroIds[i] != 0) // Chỉ thêm nếu vaiTroId hợp lệ
                             {
                                 _context.PhanQuyenTaiLieus.Add(new PhanQuyenTaiLieu
                                 {
@@ -180,58 +255,29 @@ namespace QLDuAn.Controllers
                                 });
                             }
                         }
+                    }
 
-                        await _context.SaveChangesAsync();
-                        TempData["SuccessMessage"] = "Cập nhật tài liệu thành công!";
-                        return RedirectToAction(nameof(Index));
-                    }
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Cập nhật tài liệu thành công!";
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TaiLieuExists(taiLieu.MaTaiLieu))
                 {
-                    if (!TaiLieuExists(taiLieu.MaTaiLieu))
-                    {
-                        return NotFound();
-                    }
-                    throw;
+                    return NotFound();
                 }
-            
+                throw;
+            }
 
             ViewBag.DuAnList = new SelectList(_context.DuAns, "MaDuAn", "TenDuAn", taiLieu.MaDuAn);
-            ViewBag.CongViecList = new SelectList(_context.CongViecs, "MaCongViec", "TenCongViec", taiLieu.MaCongViec);
-            ViewBag.VaiTroList = new SelectList(_context.VaiTros, "MaVaiTro", "TenVaiTro");
+            ViewBag.CongViecList = new SelectList(_context.CongViecs.Where(c => c.MaDuAn == taiLieu.MaDuAn), "MaCongViec", "TenCongViec", taiLieu.MaCongViec);
+            ViewBag.VaiTroList = new SelectList(_context.VaiTros.Where(v => v.MaVaiTro != adminVaiTroId), "MaVaiTro", "TenVaiTro");
             return View(taiLieu);
         }
 
-        // POST: TaiLieu/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var taiLieu = await _context.TaiLieus.FindAsync(id);
-            if (taiLieu == null)
-            {
-                return NotFound();
-            }
-
-            // Xóa file trên server
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", taiLieu.FilePath.TrimStart('/'));
-            if (System.IO.File.Exists(filePath))
-            {
-                System.IO.File.Delete(filePath);
-            }
-
-            // Xóa phân quyền
-            var permissions = await _context.PhanQuyenTaiLieus
-                .Where(p => p.MaTaiLieu == id)
-                .ToListAsync();
-            _context.PhanQuyenTaiLieus.RemoveRange(permissions);
-
-            // Xóa tài liệu
-            _context.TaiLieus.Remove(taiLieu);
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Xóa tài liệu thành công!";
-            return RedirectToAction(nameof(Index));
-        }
+        //
 
         // GET: TaiLieu/Download/5
         public async Task<IActionResult> Download(int id)
@@ -242,8 +288,8 @@ namespace QLDuAn.Controllers
                 return NotFound();
             }
 
-            // Kiểm tra phân quyền (giả định user có MaVaiTro = 1)
-            var userVaiTro = 1; // Lấy từ User.Identity
+            // Kiểm tra phân quyền (bao gồm cả Admin)
+            var userVaiTro = 1; // Giả định người dùng đăng nhập
             var hasPermission = await _context.PhanQuyenTaiLieus
                 .AnyAsync(p => p.MaTaiLieu == id && p.MaVaiTro == userVaiTro && p.QuyenTruyCap == "Tải");
 
@@ -262,6 +308,52 @@ namespace QLDuAn.Controllers
             return File(fileBytes, "application/octet-stream", taiLieu.TenTaiLieu);
         }
 
+        // GET: TaiLieu/GetCongViecByDuAn
+        [HttpGet]
+        public async Task<IActionResult> GetCongViecByDuAn(int maDuAn)
+        {
+            var congViecList = await _context.CongViecs
+                .Where(c => c.MaDuAn == maDuAn)
+                .Select(c => new { c.MaCongViec, c.TenCongViec })
+                .ToListAsync();
+            return Json(congViecList);
+        }
+        // GET: TaiLieu/Delete/5
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (int.IsEvenInteger(id))
+            {
+                return NotFound();
+            }
+
+            var taiLieu = await _context.TaiLieus
+                .Include(t => t.MaDuAnNavigation)
+                .Include(t => t.MaCongViecNavigation)
+                .Include(t => t.NguoiUploadNavigation)
+                .FirstOrDefaultAsync(m => m.MaTaiLieu == id);
+
+            if (taiLieu == null)
+            {
+                return NotFound();
+            }
+
+            return View(taiLieu);
+        }
+
+        // POST: TaiLieu/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var taiLieu = await _context.TaiLieus.FindAsync(id);
+            if (taiLieu != null)
+            {
+                _context.TaiLieus.Remove(taiLieu);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
         private bool TaiLieuExists(int id)
         {
             return _context.TaiLieus.Any(e => e.MaTaiLieu == id);

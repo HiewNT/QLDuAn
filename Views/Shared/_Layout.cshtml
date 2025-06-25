@@ -1,7 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Http
+@using System.Security.Claims
 @{
     var isLoggedIn = User.Identity.IsAuthenticated;
     var userName = isLoggedIn ? User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value : null;
+    var userRole = isLoggedIn ? User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value : null; // Sửa "Roles" thành ClaimTypes.Role
     // Mock notification count - in real app, get from database or service
     var notificationCount = 5;
 }
@@ -17,23 +19,17 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
 
-
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.7/index.global.min.css" rel="stylesheet" />
-
-    <!-- FullCalendar JS (dạng global, xuất Calendar ra window) -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.7/index.global.min.js"></script>
-
-
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="@(isLoggedIn ? "Index" : "Login")">
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="@(isLoggedIn ? (userRole == "Admin" ? "Index" : "Profile") : "Login")">
                     <i class="bi bi-kanban me-2"></i>ONE TOUCH PRODUCTION
                 </a>
-
                 @if (isLoggedIn)
                 {
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -54,7 +50,7 @@
                                         <h6 class="mb-0">Thông báo</h6>
                                         <a href="#" class="text-primary small" onclick="markAllAsRead(event); return false;">Đánh dấu đã đọc</a>
                                     </div>
-                                    <div id="notificationContainer" class="notification-container">
+                                    <div id="notificationContainer" class="notification-container" style="max-height: 320px; overflow-y: auto;">
                                         <div class="text-center text-muted py-3">Đang tải...</div>
                                     </div>
                                     <div class="dropdown-footer text-center py-2">
@@ -73,11 +69,6 @@
                                     <li>
                                         <a class="dropdown-item" asp-action="Profile" asp-controller="Home">
                                             <i class="bi bi-person me-2"></i>Hồ sơ cá nhân
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-action="Settings" asp-controller="Home">
-                                            <i class="bi bi-gear me-2"></i>Cài đặt
                                         </a>
                                     </li>
                                     <li>
@@ -112,29 +103,35 @@
                         <div class="p-3 border-bottom">
                             <h6 class="text-muted mb-0 text-uppercase fw-semibold">Menu chính</h6>
                         </div>
-                        <div class="list-group list-group-flush">
-                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="Home" asp-action="Index">
+
+                    <div class="list-group list-group-flush">
+                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="Home" asp-action="@(userRole == "Admin" ? "Index" : "Profile")">
                                 <i class="bi bi-house-door me-3 text-primary"></i> Trang chủ
                             </a>
+                        @if (userRole == "Admin")
+                        {
                             <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="NguoiDung" asp-action="Index">
                                 <i class="bi bi-people me-3 text-success"></i> Người dùng
-                            </a>
-                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="DuAn" asp-action="Index">
-                                <i class="bi bi-folder me-3 text-success"></i> Dự án
-                            </a>
-                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="CongViec" asp-action="Index">
-                                <i class="bi bi-list-task me-3 text-warning"></i> Công việc
-                            </a>
-                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="TaiLieu" asp-action="Index">
-                                <i class="bi bi-file-text me-3 text-info"></i> Tài liệu
                             </a>
                             <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="ToChuyenMon" asp-action="Index">
                                 <i class="bi bi-people-fill me-3 text-info"></i> Tổ chuyên môn
                             </a>
-                            <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="ThongBao" asp-action="Index">
-                                <i class="bi bi-bell me-3 text-secondary"></i> Thông báo
-                            </a>
-                        </div>
+                        }
+
+                        <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="DuAn" asp-action="Index">
+                            <i class="bi bi-folder me-3 text-success"></i> Dự án
+                        </a>
+                        <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="CongViec" asp-action="Index">
+                            <i class="bi bi-list-task me-3 text-warning"></i> Công việc
+                        </a>
+                        <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="TaiLieu" asp-action="Index">
+                            <i class="bi bi-file-text me-3 text-info"></i> Tài liệu
+                        </a>
+                        <a class="list-group-item list-group-item-action border-0 py-3" asp-controller="ThongBao" asp-action="Index">
+                            <i class="bi bi-bell me-3 text-secondary"></i> Thông báo
+                        </a>
+                    </div>
+
                     </div>
                 </div>
             }

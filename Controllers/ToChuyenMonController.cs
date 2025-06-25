@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QLDuAn.Models;
@@ -7,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace QLDuAn.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class ToChuyenMonController : Controller
     {
         private readonly QlduAnContext _context;

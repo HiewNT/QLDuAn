@@ -74,6 +74,7 @@
                             <th class="border-0">Tên công việc</th>
                             <th class="border-0">Giai đoạn</th>
                             <th class="border-0">Trạng thái</th>
+                            <th class="border-0">Ngày bắt đầu</th>
                             <th class="border-0">Deadline</th>
                             <th class="border-0">Thực hiện</th>
                             <th class="border-0">Tổ</th>
@@ -119,6 +120,7 @@
                                             break;
                                     }
                                 </td>
+                                <td>@(item.NgayBatDau?.ToString("dd/MM/yyyy") ?? "-")</td>
                                 <td>@(item.Deadline?.ToString("dd/MM/yyyy") ?? "-")</td>
                                 <td>@Html.DisplayFor(modelItem => item.MaNguoiDungNavigation.HoTen)</td>
                                 <td>
@@ -155,40 +157,46 @@
 </div>
 <style>
     /* Table column widths */
-    #tasksTable th:nth-child(1), #tasksTable td:nth-child(1) { 
+    #tasksTable th:nth-child(1), #tasksTable td:nth-child(1) {
+        width: 12%;
+    }
+
+    #tasksTable th:nth-child(2), #tasksTable td:nth-child(2) {
         width: 13%;
     }
 
-    #tasksTable th:nth-child(2), #tasksTable td:nth-child(2) { 
-        width: 14%;
-    }
-
-    #tasksTable th:nth-child(3), #tasksTable td:nth-child(3) { 
+    #tasksTable th:nth-child(3), #tasksTable td:nth-child(3) {
         width: 10%;
         text-align: center;
     }
 
-    #tasksTable th:nth-child(4), #tasksTable td:nth-child(4) { 
+    #tasksTable th:nth-child(4), #tasksTable td:nth-child(4) {
         width: 10%;
     }
 
-    #tasksTable th:nth-child(5), #tasksTable td:nth-child(5) { 
+    #tasksTable th:nth-child(5), #tasksTable td:nth-child(5) {
         width: 8%;
         text-align: center;
     }
 
     #tasksTable th:nth-child(6), #tasksTable td:nth-child(6) {
-        width: 12%;
+        width: 8%;
         text-align: center;
     }
 
-    #tasksTable th:nth-child(7), #tasksTable td:nth-child(7) { 
+    #tasksTable th:nth-child(7), #tasksTable td:nth-child(7) {
         width: 10%;
     }
 
-    #tasksTable th:nth-child(8), #tasksTable td:nth-child(8) { 
+    #tasksTable th:nth-child(8), #tasksTable td:nth-child(8) {
+        width: 7%;
+    }
+
+    #tasksTable th:nth-child(9), #tasksTable td:nth-child(9) {
         width: 23%;
     }
+
+
 
 </style>
 @section Scripts {
@@ -232,10 +240,9 @@
             // Custom filter for team
             $('#toFilter').on('change', function () {
                 var val = $(this).find("option:selected").text();
-                table.column(6).search(val === "Tất cả tổ" ? "" : val).draw();
+                table.column(7).search(val === "Tất cả tổ" ? "" : val).draw();
             });
 
-        });
         });
     </script>
 }

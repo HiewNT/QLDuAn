@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QLDuAn.Models;
 using System.Linq;
 
+[Authorize]
 public class ThongBaoController : Controller
 {
     private readonly QlduAnContext _context;
@@ -10,7 +12,10 @@ public class ThongBaoController : Controller
     {
         _context = context;
     }
-
+    public IActionResult Index()
+    {
+        return View();
+    }
     // API trả về danh sách thông báo chưa đọc cho user hiện tại (dùng AJAX)
     public IActionResult GetAll()
     {

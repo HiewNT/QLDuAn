@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QLDuAn.Models;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
+[Authorize]
 public class DuAnController : Controller
 {
     private readonly QlduAnContext _context;
@@ -125,13 +127,6 @@ public class DuAnController : Controller
             return NotFound();
         }
 
-        // Kiểm tra xem dự án có công việc liên quan không
-        var hasCongViec = await _context.CongViecs.AnyAsync(cv => cv.MaDuAn == id);
-        if (hasCongViec)
-        {
-            TempData["ErrorMessage"] = "Không thể xóa dự án vì đã có công việc liên quan.";
-            return RedirectToAction(nameof(Index));
-        }
 
         _context.DuAns.Remove(duAn);
         await _context.SaveChangesAsync();

@@ -143,6 +143,7 @@ public class BaoCaoGenerator
                                     columns.RelativeColumn(2);
                                     columns.RelativeColumn(2);
                                     columns.RelativeColumn(2);
+                                    columns.RelativeColumn(2);
                                 });
 
                                 table.Header(header =>
@@ -152,6 +153,7 @@ public class BaoCaoGenerator
                                     header.Cell().Element(CellStyle).Text("Tổ chuyên môn").Bold();
                                     header.Cell().Element(CellStyle).Text("Trạng thái").Bold();
                                     header.Cell().Element(CellStyle).Text("Người thực hiện").Bold();
+                                    header.Cell().Element(CellStyle).Text("Ngày bắt đầu").Bold();
                                     header.Cell().Element(CellStyle).Text("Deadline").Bold();
                                 });
 
@@ -164,6 +166,7 @@ public class BaoCaoGenerator
                                     table.Cell().Element(CellStyle).Text(cv.TrangThai)
                                         .FontColor(GetStatusColor(cv.TrangThai));
                                     table.Cell().Element(CellStyle).Text(cv.MaNguoiDungNavigation?.HoTen ?? "N/A");
+                                    table.Cell().Element(CellStyle).Text(cv.NgayBatDau?.ToString("dd/MM/yyyy") ?? "");
                                     table.Cell().Element(CellStyle).Text(cv.Deadline?.ToString("dd/MM/yyyy") ?? "");
                                 }
                             });

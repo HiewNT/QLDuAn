@@ -1,0 +1,381 @@
+﻿@model NguoiDung
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                </h2>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="fas fa-edit me-1"></i>Chỉnh sửa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Thông tin cá nhân
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Họ và tên</label>
+                            <div class="form-control-plaintext border-bottom">
+                                <i class="fas fa-user text-primary me-2"></i>
+                                <strong>@Model.HoTen</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Email</label>
+                            <div class="form-control-plaintext border-bottom">
+                                <i class="fas fa-envelope text-primary me-2"></i>
+                                @Model.Email
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Vai trò</label>
+                            <div class="form-control-plaintext border-bottom">
+                                <i class="fas fa-user-tag text-primary me-2"></i>
+                                <span class="badge bg-info">@Model.MaVaiTroNavigation.TenVaiTro</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Tổ chuyên môn</label>
+                            <div class="form-control-plaintext border-bottom">
+                                <i class="fas fa-users text-primary me-2"></i>
+                                @(Model.MaToNavigation?.TenTo ?? "Chưa có")
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Trạng thái</label>
+                            <div class="form-control-plaintext border-bottom">
+                                <i class="fas fa-circle text-primary me-2"></i>
+                                @if (Model.TrangThai == true)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Hoạt động
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times me-1"></i>Không hoạt động
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="@Url.Action("Index", "CongViec")" class="btn btn-primary btn-sm w-auto fs-6">
+                        <i class="fas fa-tasks me-1"></i> Xem công việc
+                    </a>
+                    <a href="@Url.Action("Index", "ThongBao")" class="btn btn-success btn-sm w-auto fs-6">
+                        <i class="fas fa-bell me-1"></i> Xem thông báo
+                    </a>
+                    <a href="@Url.Action("Index", "Lich")" class="btn btn-secondary btn-sm w-auto fs-6">
+                        <i class="fas fa-calendar-alt me-1"></i> Theo dõi lịch
+                    </a>
+                    <button type="button" class="btn btn-warning btn-sm w-auto fs-6" onclick="changePassword()">
+                        <i class="fas fa-key me-1"></i> Đổi mật khẩu
+                    </button>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Thống kê
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">
+                                <i class="fas fa-tasks me-2"></i>Công việc đang thực hiện
+                            </span>
+                            <span class="badge bg-warning" id="stat-cv-dang">5</span>
+                        </div>
+                    </div>
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">
+                                <i class="fas fa-check-circle me-2"></i>Công việc hoàn thành
+                            </span>
+                            <span class="badge bg-success" id="stat-cv-hoan-thanh">12</span>
+                        </div>
+                    </div>
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">
+                                <i class="fas fa-bell me-2"></i>Thông báo chưa đọc
+                            </span>
+                            <span class="badge bg-danger" id="stat-thong-bao">3</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">
+                                <i class="fas fa-percentage me-2"></i>Tỉ lệ hoàn thành
+                            </span>
+                            <span class="badge bg-primary" id="stat-ti-le">85%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (ViewBag.DuAnQuanLy != null && ((IEnumerable<dynamic>)ViewBag.DuAnQuanLy).Any())
+{
+    <!-- Dự án quản lý -->
+    <div class="card shadow-sm mt-3">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-project-diagram me-2"></i>Dự án đang quản lý (@(((IEnumerable<dynamic>)ViewBag.DuAnQuanLy).Count()))
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @foreach (dynamic duAn in ViewBag.DuAnQuanLy)
+            {
+                <div class="project-item p-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0 text-truncate">
+                            <a href="@Url.Action("Details", "DuAn", new { id = duAn.MaDuAn })" class="text-decoration-none">
+                                @duAn.TenDuAn
+                            </a>
+                        </h6>
+                        <span class="badge bg-@(duAn.TrangThai == "Đang thực hiện" ? "primary" : duAn.TrangThai == "Hoàn thành" ? "success" : "secondary") ms-2">
+                            @duAn.TrangThai
+                        </span>
+                    </div>
+
+                    <div class="progress mb-2" style="height: 6px;">
+                        <div class="progress-bar bg-@(duAn.TienDo >= 80 ? "success" : duAn.TienDo >= 50 ? "warning" : "danger")"
+                             role="progressbar"
+                             style="width: @duAn.TienDo%"
+                             aria-valuenow="@duAn.TienDo"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+
+                    <div class="row text-muted small">
+                        <div class="col-6">
+                            <i class="fas fa-tasks me-1"></i>
+                            @duAn.CongViecHoanThanh/@duAn.TongCongViec CV
+                        </div>
+                        <div class="col-6 text-end">
+                            <i class="fas fa-percentage me-1"></i>@duAn.TienDo%
+                        </div>
+                    </div>
+
+                    @if (duAn.NgayBatDau != null || duAn.NgayKetThuc != null)
+                    {
+                        <div class="row text-muted small mt-1">
+                            @if (duAn.NgayBatDau != null)
+                            {
+                                <div class="col-6">
+                                    <i class="fas fa-play me-1"></i>
+                                    @(((DateOnly)duAn.NgayBatDau).ToDateTime(TimeOnly.MinValue).ToString("dd/MM/yyyy"))
+                                </div>
+                            }
+                            @if (duAn.NgayKetThuc != null)
+                            {
+                                <div class="col-6 text-end">
+                                    <i class="fas fa-flag-checkered me-1"></i>
+                                    @(((DateOnly)duAn.NgayKetThuc).ToDateTime(TimeOnly.MinValue).ToString("dd/MM/yyyy"))
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="p-3 text-center">
+                <a href="@Url.Action("Index", "DuAn")" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-eye me-1"></i>Xem tất cả dự án
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">
+                    <i class="fas fa-edit me-2"></i>Chỉnh sửa hồ sơ
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editProfileForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editHoTen" class="form-label">Họ và tên</label>
+                        <input type="text" class="form-control" id="editHoTen" value="@Model.HoTen" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" value="@Model.Email" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load thống kê thực tế (nếu có API)
+            loadUserStats();
+
+            // Submit form chỉnh sửa profile
+            $('#editProfileForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var formData = {
+                    HoTen: $('#editHoTen').val(),
+                    Email: $('#editEmail').val()
+                };
+
+                $.ajax({
+                    url: '@Url.Action("UpdateProfile", "Home")',
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if(response.success) {
+                            toastr.success('Cập nhật thông tin thành công!');
+                            $('#editProfileModal').modal('hide');
+                            location.reload(); // Reload để hiển thị thông tin mới
+                        } else {
+                            toastr.error(response.message || 'Có lỗi xảy ra!');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi cập nhật thông tin!');
+                    }
+                });
+            });
+        });
+
+        function loadUserStats() {
+            // Gọi API để load thống kê thực tế
+            $.ajax({
+                url: '@Url.Action("GetUserStats", "Home")',
+                type: 'GET',
+                success: function(data) {
+                    // Cập nhật các badge với dữ liệu thực
+                    if(data) {
+                        $('#stat-cv-dang').text(data.congViecDangThucHien || 0);
+                        $('#stat-cv-hoan-thanh').text(data.congViecHoanThanh || 0);
+                        $('#stat-thong-bao').text(data.thongBaoChuaDoc || 0);
+                        $('#stat-ti-le').text((data.tiLeHoanThanh || 0) + '%');
+                    }
+                },
+                error: function() {
+                    console.log('Không thể tải thống kê người dùng');
+                }
+            });
+        }
+
+        function changePassword() {
+            // Redirect đến trang đổi mật khẩu
+            window.location.href = '@Url.Action("ChangePassword", "Home")';
+        }
+    </script>
+
+    <style>
+        .card {
+            border: none;
+            transition: transform 0.2s ease-in-out;
+        }
+
+            .card:hover {
+                transform: translateY(-2px);
+            }
+
+        .form-control-plaintext {
+            border-bottom: 1px solid #dee2e6 !important;
+            border-radius: 0;
+            padding: 8px 0;
+            background: transparent;
+        }
+
+        .stat-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+            .stat-item:last-child {
+                border-bottom: none;
+            }
+
+        .badge {
+            font-size: 0.875rem;
+        }
+
+        .project-item {
+            transition: background-color 0.2s ease;
+        }
+
+            .project-item:hover {
+                background-color: #f8f9fa;
+            }
+
+            .project-item:last-child {
+                border-bottom: none !important;
+            }
+
+        media (max-width: 768px) {
+            .container
+
+        {
+            padding: 0 10px;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        }
+    </style>
+}
+
+@Html.AntiForgeryToken()

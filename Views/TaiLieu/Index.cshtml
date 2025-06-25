@@ -4,56 +4,142 @@
     ViewData["Title"] = "Danh sách tài liệu";
 }
 
-<h2>Danh sách tài liệu</h2>
-
-
-<div class="mb-3">
-    <form asp-action="Index" method="get">
-        <div class="form-group">
-            <label for="maDuAn">Lọc theo dự án:</label>
-            <select id="maDuAn" name="maDuAn" class="form-control d-inline-block w-auto" onchange="this.form.submit()">
-                <option value="" selected="@(string.IsNullOrEmpty(Context.Request.Query["maDuAn"]) ? "selected" : null)">-- Tất cả dự án --</option>
-                @foreach (var item in ViewBag.DuAnList as SelectList)
-                {
-                    <option value="@item.Value" selected="@(item.Value == Context.Request.Query["maDuAn"].ToString() ? "selected" : null)">@item.Text</option>
-                }
-            </select>
+<div class="container-fluid py-4">
+    <div class="d-sm-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary mb-0">Danh sách tài liệu</h2>
+            <p class="text-muted">Quản lý tất cả tài liệu trong hệ thống</p>
         </div>
-    </form>
+        <a asp-action="Create" class="btn btn-primary d-flex align-items-center">
+            <i class="fas fa-plus-circle me-2"></i>
+            Tạo tài liệu mới
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form asp-action="Index" method="get" class="d-flex align-items-center">
+                        <div class="form-group flex-grow-1 me-3 mb-0">
+                            <label for="maDuAn" class="form-label text-muted small mb-1">Lọc theo dự án</label>
+                            <select id="maDuAn" name="maDuAn" class="form-select" onchange="this.form.submit()">
+                                <option value="" selected="@(string.IsNullOrEmpty(Context.Request.Query["maDuAn"]) ? "selected" : null)">
+                                    Tất cả dự án
+                                </option>
+                                @foreach (var item in ViewBag.DuAnList as SelectList)
+                                {
+                                    <option value="@item.Value" selected="@(item.Value == Context.Request.Query["maDuAn"].ToString() ? "selected" : null)">
+                                        @item.Text
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0">Tên tài liệu</th>
+                            <th class="border-0">Dự án</th>
+                            <th class="border-0">Công việc</th>
+                            <th class="border-0">Người upload</th>
+                            <th class="border-0">Ngày upload</th>
+                            <th class="border-0 text-end">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="far fa-file-alt text-primary me-2"></i>
+                                        <span>@item.TenTaiLieu</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.MaDuAnNavigation != null)
+                                    {
+                                        <span class="badge bg-info">@item.MaDuAnNavigation.TenDuAn</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Không gắn dự án</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.MaCongViecNavigation != null)
+                                    {
+                                        <span class="badge bg-success">@item.MaCongViecNavigation.TenCongViec</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Không gắn công việc</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-circle me-2 text-muted"></i>
+                                        @item.NguoiUploadNavigation.HoTen
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="far fa-calendar-alt me-2 text-muted"></i>
+                                        @item.NgayUpload
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-end gap-2">
+
+                                        <a href="@item.FilePath" class="btn btn-primary btn-sm" target="_blank">
+                                            <i class="bi bi-eye me-1"></i>Xem
+                                        </a>
+                                        <a asp-action="Download" asp-route-id="@item.MaTaiLieu" class="btn btn-info btn-sm">
+                                            <i class="bi bi-download me-1"></i>Tải xuống
+                                        </a>
+
+                                        <a asp-action="Edit" asp-route-id="@item.MaTaiLieu"
+                                           class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil-square me-1"></i>Sửa
+                                        </a>
+                                        <form asp-action="Delete" class="d-inline" asp-route-id="@item.MaTaiLieu" method="post"
+                                              style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa tài liệu này?');">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Xóa">
+                                                <i class="bi bi-trash me-1"></i>Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Tạo tài liệu mới</a>
-</p>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Tên tài liệu</th>
-            <th>Dự án</th>
-            <th>Công việc</th>
-            <th>Người upload</th>
-            <th>Ngày upload</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.TenTaiLieu)</td>
-                <td>@(item.MaDuAnNavigation != null ? item.MaDuAnNavigation.TenDuAn : "Không gắn dự án")</td>
-                <td>@(item.MaCongViecNavigation != null ? item.MaCongViecNavigation.TenCongViec : "Không gắn công việc")</td>
-                <td>@Html.DisplayFor(modelItem => item.NguoiUploadNavigation.HoTen)</td>
-                <td>@Html.DisplayFor(modelItem => item.NgayUpload)</td>
-                <td>
-                    <a asp-action="Download" asp-route-id="@item.MaTaiLieu" class="btn btn-success btn-sm">Tải xuống</a>
-                    <a asp-action="Edit" asp-route-id="@item.MaTaiLieu" class="btn btn-warning btn-sm">Sửa</a>
-                    <form asp-action="Delete" asp-route-id="@item.MaTaiLieu" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa tài liệu này?');">
-                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                    </form>
-                </td>
-            </tr>
+@section Styles {
+    <style>
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.02em;
         }
-    </tbody>
-</table>
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 1em;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.6rem;
+        }
+    </style>
+}

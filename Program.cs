@@ -11,7 +11,7 @@ builder.Services.AddDbContext<QlduAnContext>(options =>
 
 // Đăng ký dịch vụ MVC
 builder.Services.AddControllersWithViews();
-builder.Services.AddHostedService<ThongBaoBackgroundJob>();
+builder.Services.AddHostedService<AutoUpdateCongViec>();
 
 // ✅ Kích hoạt Session
 builder.Services.AddSession(options =>

@@ -4,90 +4,245 @@
     ViewData["Title"] = "Chỉnh sửa tài liệu";
 }
 
-<h2>Chỉnh sửa tài liệu</h2>
-
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="MaTaiLieu" />
-    <input type="hidden" asp-for="FilePath" />
-    <input type="hidden" asp-for="NguoiUpload" />
-    <input type="hidden" asp-for="NgayUpload" />
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="form-group">
-        <label asp-for="TenTaiLieu" class="control-label"></label>
-        <input asp-for="TenTaiLieu" class="form-control" />
-        <span asp-validation-for="TenTaiLieu" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="MaDuAn" class="control-label">Dự án (tùy chọn)</label>
-        <select asp-for="MaDuAn" class="form-control" asp-items="ViewBag.DuAnList">
-            <option value="">-- Không gắn dự án --</option>
-        </select>
-        <span asp-validation-for="MaDuAn" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="MaCongViec" class="control-label">Công việc (tùy chọn)</label>
-        <select asp-for="MaCongViec" class="form-control" asp-items="ViewBag.CongViecList">
-            <option value="">-- Không gắn công việc --</option>
-        </select>
-        <span asp-validation-for="MaCongViec" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label">Phân quyền truy cập</label>
-        <div id="phanQuyenContainer">
-            @foreach (var perm in Model.PhanQuyenTaiLieus)
-            {
-                <div class="phan-quyen-row mb-2">
-                    <select name="vaiTroIds" class="form-control d-inline-block w-50" asp-items="ViewBag.VaiTroList">
-                        <option value="@perm.MaVaiTro" selected>@perm.MaVaiTroNavigation.TenVaiTro</option>
-                    </select>
-                    <select name="quyenTruyCaps" class="form-control d-inline-block w-25">
-                        <option value="Xem" selected="@(perm.QuyenTruyCap == "Xem")">Xem</option>
-                        <option value="Tải" selected="@(perm.QuyenTruyCap == "Tải")">Tải</option>
-                        <option value="Sửa" selected="@(perm.QuyenTruyCap == "Sửa")">Sửa</option>
-                        <option value="Xóa" selected="@(perm.QuyenTruyCap == "Xóa")">Xóa</option>
-                    </select>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="addPhanQuyenRow()">Thêm</button>
-                </div>
-            }
-            @if (!Model.PhanQuyenTaiLieus.Any())
-            {
-                <div class="phan-quyen-row mb-2">
-                    <select name="vaiTroIds" class="form-control d-inline-block w-50" asp-items="ViewBag.VaiTroList">
-                        <option value="">-- Chọn vai trò --</option>
-                    </select>
-                    <select name="quyenTruyCaps" class="form-control d-inline-block w-25">
-                        <option value="Xem">Xem</option>
-                        <option value="Tải">Tải</option>
-                        <option value="Sửa">Sửa</option>
-                        <option value="Xóa">Xóa</option>
-                    </select>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="addPhanQuyenRow()">Thêm</button>
-                </div>
-            }
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Tài liệu</a></li>
+                    <li class="breadcrumb-item active">Chỉnh sửa</li>
+                </ol>
+            </nav>
+            <h2 class="h3 mb-0">
+                <i class="bi bi-file-earmark-text me-2 text-primary"></i>Chỉnh sửa tài liệu
+            </h2>
+            <p class="text-muted mb-0">Cập nhật thông tin tài liệu: <strong>@Model.TenTaiLieu</strong></p>
         </div>
     </div>
 
-    <div class="form-group">
-        <input type="submit" value="Lưu" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Edit" method="post" class="card shadow-sm">
+                <input type="hidden" asp-for="MaTaiLieu" />
+                <input type="hidden" asp-for="FilePath" />
+                <input type="hidden" asp-for="NguoiUpload" />
+                <input type="hidden" asp-for="NgayUpload" />
+
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+
+                    <!-- Tên tài liệu -->
+                    <div class="mb-3">
+                        <label asp-for="TenTaiLieu" class="form-label required">
+                            <i class="bi bi-type me-2"></i>Tên tài liệu
+                        </label>
+                        <input asp-for="TenTaiLieu" class="form-control" placeholder="Nhập tên tài liệu..." />
+                        <span asp-validation-for="TenTaiLieu" class="text-danger"></span>
+                    </div>
+
+                    <!-- Dự án -->
+                    <div class="mb-3">
+                        <label asp-for="MaDuAn" class="form-label required">
+                            <i class="bi bi-folder me-2"></i>Dự án
+                        </label>
+                        <select asp-for="MaDuAn" id="maDuAn" class="form-select" asp-items="ViewBag.DuAnList"
+                                required onchange="loadCongViec()">
+                            <option value="">-- Chọn dự án --</option>
+                        </select>
+                        <span asp-validation-for="MaDuAn" class="text-danger"></span>
+                    </div>
+
+                    <!-- Công việc -->
+                    <div class="mb-3">
+                        <label asp-for="MaCongViec" class="form-label">
+                            <i class="bi bi-list-task me-2"></i>Công việc <span class="text-muted">(tùy chọn)</span>
+                        </label>
+                        <select asp-for="MaCongViec" id="maCongViec" class="form-select" asp-items="ViewBag.CongViecList">
+                            <option value="">-- Không gắn công việc --</option>
+                        </select>
+                        <div class="form-text">
+                            Chọn công việc cụ thể nếu tài liệu liên quan đến một tác vụ nhất định
+                        </div>
+                        <span asp-validation-for="MaCongViec" class="text-danger"></span>
+                    </div>
+
+                    <!-- Phân quyền -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-shield-lock me-2"></i>Phân quyền truy cập
+                        </label>
+                        <div class="alert alert-info py-2">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <small>Quản trị viên mặc định có tất cả quyền truy cập</small>
+                        </div>
+
+                        <div id="phanQuyenContainer" class="border rounded p-3 bg-light">
+                            @foreach (var perm in Model.PhanQuyenTaiLieus.Where(p => p.MaVaiTro != 1))
+                            {
+                                <div class="phan-quyen-row mb-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-5">
+                                            <label class="form-label mb-1">Vai trò</label>
+                                            <select name="vaiTroIds[]" class="form-select" asp-items="ViewBag.VaiTroList">
+                                                <option value="@perm.MaVaiTro" selected>@perm.MaVaiTroNavigation.TenVaiTro</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label mb-1">Quyền truy cập</label>
+                                            <select name="quyenTruyCaps[]" class="form-select">
+                                                <option value="Xem" selected="@(perm.QuyenTruyCap == "Xem")">Chỉ xem</option>
+                                                <option value="Tải" selected="@(perm.QuyenTruyCap == "Tải")">Tải xuống</option>
+                                                <option value="Sửa" selected="@(perm.QuyenTruyCap == "Sửa")">Chỉnh sửa</option>
+                                                <option value="Xóa" selected="@(perm.QuyenTruyCap == "Xóa")">Xóa</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label mb-1 d-block"> </label>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-success btn-sm"
+                                                        onclick="addPhanQuyenRow()" title="Thêm quyền">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                        onclick="removePhanQuyenRow(this)" title="Xóa quyền">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (!Model.PhanQuyenTaiLieus.Any(p => p.MaVaiTro != 1))
+                            {
+                                <div class="phan-quyen-row mb-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-5">
+                                            <label class="form-label mb-1">Vai trò</label>
+                                            <select name="vaiTroIds[]" class="form-select" asp-items="ViewBag.VaiTroList">
+                                                <option value="">-- Chọn vai trò --</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label mb-1">Quyền truy cập</label>
+                                            <select name="quyenTruyCaps[]" class="form-select">
+                                                <option value="Xem">Chỉ xem</option>
+                                                <option value="Tải">Tải xuống</option>
+                                                <option value="Sửa">Chỉnh sửa</option>
+                                                <option value="Xóa">Xóa</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label mb-1 d-block"> </label>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-success btn-sm"
+                                                        onclick="addPhanQuyenRow()" title="Thêm quyền">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                        onclick="removePhanQuyenRow(this)" title="Xóa quyền">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Hướng dẫn -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-white">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-question-circle me-2 text-primary"></i>Hướng dẫn
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Cập nhật tên tài liệu để dễ nhận diện.
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Gắn tài liệu với dự án và công việc phù hợp.
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Phân quyền truy cập cho các vai trò khác nhau.
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Nhấn "Lưu thay đổi" để xác nhận.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-</form>
+</div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script>
+        function loadCongViec() {
+            var maDuAn = $("#maDuAn").val();
+            var congViecSelect = $("#maCongViec");
+
+            congViecSelect.empty();
+            congViecSelect.append('<option value="">-- Không gắn công việc --</option>');
+
+            if (maDuAn) {
+                $.ajax({
+                    url: '/TaiLieu/GetCongViecByDuAn',
+                    type: 'GET',
+                    data: { maDuAn: maDuAn },
+                    success: function (data) {
+                        $.each(data, function (i, item) {
+                            congViecSelect.append($('<option>', {
+                                value: item.maCongViec,
+                                text: item.tenCongViec
+                            }));
+                        });
+                    },
+                    error: function () {
+                        alert("Không thể tải danh sách công việc.");
+                    }
+                });
+            }
+        }
+
         function addPhanQuyenRow() {
-            var container = document.getElementById('phanQuyenContainer');
-            var newRow = container.querySelector('.phan-quyen-row').cloneNode(true);
-            newRow.querySelector('select[name="vaiTroIds"]').value = '';
-            newRow.querySelector('select[name="quyenTruyCaps"]').value = 'Xem';
-            container.appendChild(newRow);
+            var container = $("#phanQuyenContainer");
+            var row = container.find(".phan-quyen-row").first().clone(); // Chọn dòng đầu tiên có class .phan-quyen-row
+            row.find("select[name='vaiTroIds[]']").val(""); // Reset vai trò
+            row.find("select[name='quyenTruyCaps[]']").val("Xem"); // Reset quyền truy cập
+            container.append(row); // Thêm dòng mới vào container
+        }
+
+        function removePhanQuyenRow(button) {
+            var row = $(button).closest(".phan-quyen-row");
+            if ($(".phan-quyen-row").length > 1) { // Kiểm tra số lượng dòng phân quyền
+                row.remove();
+            } else {
+                alert("Phải có ít nhất một dòng phân quyền!");
+            }
         }
     </script>
 }

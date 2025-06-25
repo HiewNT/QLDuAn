@@ -21,8 +21,6 @@ public partial class DuAn
 
     public virtual ICollection<CongViec> CongViecs { get; set; } = new List<CongViec>();
 
-    public virtual ICollection<LichLamViec> LichLamViecs { get; set; } = new List<LichLamViec>();
-
     public virtual NguoiDung NguoiPhuTrachNavigation { get; set; } = null!;
 
     public virtual ICollection<TaiLieu> TaiLieus { get; set; } = new List<TaiLieu>();

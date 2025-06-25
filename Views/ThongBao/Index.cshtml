@@ -1,0 +1,218 @@
+﻿@{
+    ViewData["Title"] = "Thông báo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-bell me-2"></i>Thông báo
+                    </h4>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="markAllReadBtn">
+                        <i class="fas fa-check-double me-1"></i>Đánh dấu tất cả đã đọc
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="loadingSpinner" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+
+                    <div id="thongBaoList" class="list-group list-group-flush" style="display: none;">
+                        <!-- Danh sách thông báo sẽ được load bằng AJAX -->
+                    </div>
+
+                    <div id="emptyMessage" class="text-center py-5" style="display: none;">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Không có thông báo nào</h5>
+                        <p class="text-muted">Bạn chưa có thông báo nào.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            loadThongBao();
+
+            // Load danh sách thông báo
+            function loadThongBao() {
+                $('#loadingSpinner').show();
+                $('#thongBaoList').hide();
+                $('#emptyMessage').hide();
+
+                $.ajax({
+                    url: '@Url.Action("GetAll", "ThongBao")',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#loadingSpinner').hide();
+
+                        if (data && data.length > 0) {
+                            displayThongBao(data);
+                            $('#thongBaoList').show();
+                        } else {
+                            $('#emptyMessage').show();
+                        }
+                    },
+                    error: function() {
+                        $('#loadingSpinner').hide();
+                        toastr.error('Có lỗi xảy ra khi tải thông báo');
+                    }
+                });
+            }
+
+            // Hiển thị danh sách thông báo
+            function displayThongBao(thongBaos) {
+                var html = '';
+
+                thongBaos.forEach(function(tb) {
+                    var readClass = tb.daDoc ? 'list-group-item-light' : 'list-group-item-warning';
+                    var readIcon = tb.daDoc ? 'fa-check-circle text-success' : 'fa-circle text-warning';
+                    var fontWeight = tb.daDoc ? 'normal' : 'bold';
+
+                    html += `
+                        <div class="list-group-item ${readClass} thong-bao-item" data-id="${tb.maThongBao}" data-ma-cong-viec="${tb.maCongViec || ''}">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas ${readIcon} me-2"></i>
+                                        <h6 class="mb-0" style="font-weight: ${fontWeight};">${tb.tieuDe}</h6>
+                                    </div>
+                                    <p class="mb-1 text-muted">${tb.noiDung}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>${tb.thoiGian}
+                                    </small>
+                                </div>
+                                <div class="ms-3">
+                                    ${!tb.daDoc ? `<button class="btn btn-outline-success btn-sm mark-read-btn" data-id="${tb.maThongBao}" title="Đánh dấu đã đọc">
+                                        <i class="fas fa-check"></i>
+                                    </button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                $('#thongBaoList').html(html);
+            }
+
+            // Đánh dấu tất cả đã đọc
+            $('#markAllReadBtn').click(function() {
+                $.ajax({
+                    url: '@Url.Action("MarkAllAsRead", "ThongBao")',
+                    type: 'POST',
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function() {
+                        loadThongBao(); // Reload danh sách
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra');
+                    }
+                });
+            });
+
+            // Đánh dấu một thông báo đã đọc
+            $(document).on('click', '.mark-read-btn', function(e) {
+                e.stopPropagation();
+                var id = $(this).data('id');
+
+                $.ajax({
+                    url: '@Url.Action("MarkAsRead", "ThongBao")',
+                    type: 'POST',
+                    data: { id: id },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function() {
+                        loadThongBao(); // Reload danh sách
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra');
+                    }
+                });
+            });
+
+            // Click vào thông báo để xem chi tiết (nếu có MaCongViec)
+            $(document).on('click', '.thong-bao-item', function() {
+                var maCongViec = $(this).data('ma-cong-viec');
+                var maThongBao = $(this).data('id');
+
+                // Đánh dấu đã đọc nếu chưa đọc
+                if (!$(this).hasClass('list-group-item-light')) {
+                    $.post('@Url.Action("MarkAsRead", "ThongBao")',
+                        {
+                            id: maThongBao,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        }
+                    );
+                }
+
+                // Chuyển hướng đến trang chi tiết công việc nếu có
+                if (maCongViec) {
+                    window.location.href = '@Url.Action("Details", "CongViec")/' + maCongViec;
+                }
+            });
+
+            // Auto refresh mỗi 30 giây
+            setInterval(function() {
+                loadThongBao();
+            }, 30000);
+        });
+    </script>
+
+    <style>
+        .thong-bao-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .thong-bao-item:hover {
+                background-color: #f8f9fa !important;
+                transform: translateX(2px);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+        .list-group-item-warning {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .list-group-item-light {
+            background-color: #f8f9fa;
+        }
+
+        .mark-read-btn {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+            .mark-read-btn:hover {
+                opacity: 1;
+            }
+
+        media (max-width: 768px) {
+            .card-header
+
+        {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-header .btn {
+            align-self: stretch;
+        }
+
+        }
+    </style>
+}
+
+@Html.AntiForgeryToken()

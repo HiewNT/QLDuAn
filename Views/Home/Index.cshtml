@@ -1,182 +1,228 @@
-﻿<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng điều khiển quản trị</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
-</head>
-<body>
-    <main class="main-content">
-        <div class="dashboard-header">
-            <h1 class="dashboard-title">
-                <i class="fas fa-tachometer-alt"></i>
-                Bảng điều khiển quản trị
+﻿@using System.Security.Claims
+@{
+    ViewData["Title"] = "Trang chủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2 fw-bold text-primary">
+                <i class="bi bi-speedometer2 me-2"></i>Bảng điều khiển quản trị
             </h1>
-            <p class="dashboard-subtitle">Tổng quan hệ thống quản lý dự án</p>
+            <p class="text-muted">Tổng quan hệ thống quản lý dự án</p>
         </div>
+    </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon users"><i class="fas fa-users"></i></div>
-                <div class="stat-number">@ViewBag.SoNguoiDung</div>
-                <div class="stat-label">Người dùng</div>
-                <a href="@Url.Action("Index", "NguoiDung")" class="action-link">
-                    <i class="fas fa-arrow-right"></i> Quản lý người dùng
-                </a>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon projects"><i class="fas fa-folder"></i></div>
-                <div class="stat-number">@ViewBag.SoDuAn</div>
-                <div class="stat-label">Dự án</div>
-                <a href="@Url.Action("Index", "DuAn")" class="action-link">
-                    <i class="fas fa-arrow-right"></i> Quản lý dự án
-                </a>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon tasks"><i class="fas fa-clipboard-list"></i></div>
-                <div class="stat-number">@ViewBag.SoCongViec</div>
-                <div class="stat-label">Công việc</div>
-                <a href="@Url.Action("Index", "CongViec")" class="action-link">
-                    <i class="fas fa-arrow-right"></i> Quản lý công việc
-                </a>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon documents"><i class="fas fa-file-alt"></i></div>
-                <div class="stat-number">@ViewBag.SoTaiLieu</div>
-                <div class="stat-label">Tài liệu</div>
-                <a href="@Url.Action("Index", "TaiLieu")" class="action-link">
-                    <i class="fas fa-arrow-right"></i> Quản lý tài liệu
-                </a>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon teams"><i class="fas fa-users-cog"></i></div>
-                <div class="stat-number">@ViewBag.SoTo</div>
-                <div class="stat-label">Tổ chuyên môn</div>
-                <a href="@Url.Action("Index", "ToChuyenMon")" class="action-link">
-                    <i class="fas fa-arrow-right"></i> Quản lý tổ chuyên môn
-                </a>
-            </div>
-        </div>
-
-        <div class="content-grid">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="bi bi-lightning-fill text-primary"></i> Thao tác nhanh
-                    </h5>
-                    <small class="text-muted">Các tác vụ thường dùng</small>
-                </div>
+    <div class="row mb-4">
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="quick-actions-grid">
-                        <a href="@Url.Action("Create", "DuAn")" class="quick-action-btn">
-                            <div class="quick-action-icon bg-success-subtle text-success"><i class="bi bi-plus-circle"></i></div>
-                            <div class="quick-action-text">
-                                <div class="fw-semibold">Tạo dự án mới</div>
-                                <small class="text-muted">Khởi tạo dự án</small>
-                            </div>
-                        </a>
-                        <a href="@Url.Action("Create", "CongViec")" class="quick-action-btn">
-                            <div class="quick-action-icon bg-warning-subtle text-warning"><i class="bi bi-plus-circle"></i></div>
-                            <div class="quick-action-text">
-                                <div class="fw-semibold">Thêm công việc</div>
-                                <small class="text-muted">Tạo task mới</small>
-                            </div>
-                        </a>
-                        <a href="@Url.Action("Create", "NguoiDung")" class="quick-action-btn">
-                            <div class="quick-action-icon bg-primary-subtle text-primary"><i class="bi bi-person-plus"></i></div>
-                            <div class="quick-action-text">
-                                <div class="fw-semibold">Thêm người dùng</div>
-                                <small class="text-muted">Mời thành viên</small>
-                            </div>
-                        </a>
-                        <a href="@Url.Action("Create", "TaiLieu")" class="quick-action-btn">
-                            <div class="quick-action-icon bg-info-subtle text-info"><i class="bi bi-cloud-upload"></i></div>
-                            <div class="quick-action-text">
-                                <div class="fw-semibold">Upload tài liệu</div>
-                                <small class="text-muted">Tải lên file</small>
-                            </div>
-                        </a>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title text-muted mb-2">Người dùng</h5>
+                            <h2 class="fw-bold mb-0">@ViewBag.SoNguoiDung</h2>
+                        </div>
+                        <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <a href="@Url.Action("Index", "NguoiDung")" class="stretched-link mt-3 d-block text-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Quản lý người dùng
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title text-muted mb-2">Dự án</h5>
+                            <h2 class="fw-bold mb-0">@ViewBag.SoDuAn</h2>
+                        </div>
+                        <i class="bi bi-folder text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <a href="@Url.Action("Index", "DuAn")" class="stretched-link mt-3 d-block text-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Quản lý dự án
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title text-muted mb-2">Công việc</h5>
+                            <h2 class="fw-bold mb-0">@ViewBag.SoCongViec</h2>
+                        </div>
+                        <i class="bi bi-check-circle text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <a href="@Url.Action("Index", "CongViec")" class="stretched-link mt-3 d-block text-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Quản lý công việc
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title text-muted mb-2">Tài liệu</h5>
+                            <h2 class="fw-bold mb-0">@ViewBag.SoTaiLieu</h2>
+                        </div>
+                        <i class="bi bi-file-earmark-text text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <a href="@Url.Action("Index", "TaiLieu")" class="stretched-link mt-3 d-block text-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Quản lý tài liệu
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title text-muted mb-2">Tổ chuyên môn</h5>
+                            <h2 class="fw-bold mb-0">@ViewBag.SoTo</h2>
+                        </div>
+                        <i class="bi bi-diagram-3 text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <a href="@Url.Action("Index", "ToChuyenMon")" class="stretched-link mt-3 d-block text-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Quản lý tổ chuyên môn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-5 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0 text-dark">
+                        <i class="bi bi-calendar-event me-2"></i>Lịch công việc sản xuất & hậu kỳ
+                    </h5>
+                </div>
+                <div class="card-body p-3">
+                    <a href="@Url.Action("Index", "Lich")" class="stretched-link">
+                        <div id="miniCalendar"></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-7 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0 text-dark">
+                        <i class="bi bi-bar-chart me-2"></i>Chi tiết dự án
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Tên dự án</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center">Công việc</th>
+                                    <th class="text-center">Hoàn thành</th>
+                                    <th>Tiến độ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var duAn in ViewBag.DuAnProgress)
+                                {
+                                    var progressPercentage = duAn.TongCV > 0 ? Math.Round((double)duAn.HoanThanh / duAn.TongCV * 100) : 0;
+                                    var statusClass = duAn.TrangThai switch
+                                    {
+                                        "Đang thực hiện" => "warning",
+                                        "Hoàn thành" => "success",
+                                        "Chuẩn bị" => "secondary",
+                                        _ => "secondary"
+                                    };
+                                    <tr>
+                                        <td>@duAn.TenDuAn</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-@statusClass">@duAn.TrangThai</span>
+                                        </td>
+                                        <td class="text-center">@duAn.TongCV</td>
+                                        <td class="text-center">@duAn.HoanThanh</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-@statusClass" role="progressbar" style="width: @progressPercentage%" aria-valuenow="@progressPercentage" aria-valuemin="0" aria-valuemax="100">
+                                                    @progressPercentage%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <div class="card">
-                <h2 class="card-title">
-                    <i class="fas fa-tasks"></i>
-                    Chi tiết dự án
-                </h2>
-                <div class="table-responsive">
-                    <table class="table align-middle table-bordered text-center">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Tên dự án</th>
-                                <th>Trạng thái</th>
-                                <th>Công việc</th>
-                                <th>Hoàn thành</th>
-                                <th>Tiến độ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var duAn in ViewBag.DuAnProgress)
-                            {
-                                var progressPercentage = duAn.TongCV > 0 ? Math.Round((double)duAn.HoanThanh / duAn.TongCV * 100) : 0;
-                                var statusClass = duAn.TrangThai switch
-                                {
-                                    "Đang thực hiện" => "warning",
-                                    "Hoàn thành" => "success",
-                                    "Chuẩn bị" => "secondary",
-                                    _ => "secondary"
-                                };
-                                <tr>
-                                    <td class="text-start">@duAn.TenDuAn</td>
-                                    <td>
-                                        <span class="badge bg-@statusClass">@duAn.TrangThai</span>
-                                    </td>
-                                    <td>@duAn.TongCV</td>
-                                    <td>@duAn.HoanThanh</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                                <div class="progress-bar bg-@statusClass" role="progressbar" style="width: @progressPercentage%"></div>
-                                            </div>
-                                            <small class="text-muted fw-semibold">@progressPercentage%</small>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-
         </div>
-    </main>
+    </div>
+</div>
 
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Dashboard initialized');
-            document.querySelectorAll('.stat-card, .card').forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'all 0.5s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('miniCalendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 450,
+                locale: 'vi',
+                headerToolbar: false, // Hide default toolbar
+                dayCellContent: function(arg) {
+                    if (arg.date.toDateString() === new Date().toDateString()) {
+                        return { html: `<span class="text-danger fw-bold">${arg.dayNumberText}</span>` };
+                    }
+                    return { html: arg.dayNumberText };
+                },
+                dayRender: function(info) {
+                    if (info.view.type === 'dayGridMonth' && info.isToday) {
+                        var todayCell = info.el.querySelector('.fc-daygrid-day-number');
+                        if (todayCell) {
+                            todayCell.innerHTML = `<span class="text-danger fw-bold">${info.dayNumberText}</span>`;
+                        }
+                    }
+                },
+                datesSet: function(info) {
+                    var events = calendar.getEvents();
+                    var statusDiv = document.createElement('div');
+                    statusDiv.className = 'text-muted mt-2';
+                    // Remove any existing status div to avoid duplication
+                    var existingStatus = calendarEl.querySelector('.text-muted.mt-2');
+                    if (existingStatus) existingStatus.remove();
+                    calendarEl.appendChild(statusDiv);
+                },
+                events: '/Lich/GetCongViecLich',
+                eventDidMount: function(info) {
+                    if (info.event.extendedProps.giaiDoan === "Sản xuất") {
+                        info.el.style.backgroundColor = "#0dcaf0";
+                        info.el.style.borderColor = "#0dcaf0";
+                        info.el.style.color = "#000";
+                    }
+                    if (info.event.extendedProps.giaiDoan === "Hậu kỳ") {
+                        info.el.style.backgroundColor = "#ffc107";
+                        info.el.style.borderColor = "#ffc107";
+                        info.el.style.color = "#000";
+                    }
+                },
+                editable: false,
+                eventClick: function(info) {
+                    window.location.href = '@Url.Action("Index", "Lich")';
+                }
             });
-            document.querySelectorAll('.quick-action-btn').forEach(btn => {
-                btn.addEventListener('click', e => {
-                    e.preventDefault();
-                    const action = btn.querySelector('.fw-semibold').textContent;
-                    btn.style.transform = 'scale(0.95)';
-                    setTimeout(() => btn.style.transform = 'scale(1)', 150);
-                    console.log(`Action clicked: ${action}`);
-                });
-            });
+            calendar.render();
+            calendar.gotoDate(new Date()); // Set calendar to current date
         });
     </script>
-</body>
-</html>
+}

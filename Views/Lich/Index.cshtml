@@ -2,33 +2,272 @@
     ViewData["Title"] = "Lịch làm việc";
 }
 
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-primary mb-0">
+                <i class="bi bi-calendar3 me-2"></i>Lịch công việc
+            </h2>
+            <div class="mt-2">
+                <span class="badge rounded-pill bg-info me-2" style="background-color:#0dcaf0;">
+                    <i class="bi bi-camera-video me-1"></i>Giai đoạn sản xuất
+                </span>
+                <span class="badge rounded-pill bg-warning text-dark" style="background-color:#ffc107;">
+                    <i class="bi bi-film me-1"></i>Giai đoạn hậu kỳ
+                </span>
+            </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="w-100">
+                <label for="projectFilter" class="form-label mb-1 fw-medium">
+                    <i class="bi bi-folder me-1"></i>Lọc theo dự án:
+                </label>
+                <select id="projectFilter" class="form-select shadow-sm border-2">
+                    <option value="">-- Tất cả dự án --</option>
+                    @foreach (var project in ViewBag.Projects)
+                    {
+                        <option value="@project.Value">@project.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="w-100">
+                <label for="userFilter" class="form-label mb-1 fw-medium">
+                    <i class="bi bi-person me-1"></i>Lọc theo người thực hiện:
+                </label>
+                <select id="userFilter" class="form-select shadow-sm border-2">
+                    <option value="">-- Tất cả nhân viên --</option>
+                    @foreach (var user in ViewBag.Users)
+                    {
+                        <option value="@user.Value">@user.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark">
+                    <i class="bi bi-calendar-event me-2"></i>Lịch công việc
+                </h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="goToToday()">
+                        <i class="bi bi-house me-1"></i>Hôm nay
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="goPrev()">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="goNext()">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
 
-<h2 class="mb-4"><i class="bi bi-calendar3 me-2 text-primary"></i>Lịch quay & hậu kỳ</h2>
+@section Scripts {
+    <script>
+        var calendar; // Khai báo biến global
 
-<div id="calendar"></div>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 700,
+                locale: 'vi', // Thiết lập ngôn ngữ tiếng Việt
+                headerToolbar: {
+                    left: '',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+                buttonText: {
+                    today: 'Hôm nay',
+                    month: 'Tháng',
+                    week: 'Tuần',
+                    day: 'Ngày',
+                    list: 'Danh sách'
+                },
+                dayHeaderFormat: {
+                    weekday: 'long'
+                },
+                slotLabelFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                },
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                },
+                allDayText: 'Cả ngày',
+                noEventsText: 'Không có công việc nào',
+                eventDisplay: 'block',
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    const userId = document.getElementById('userFilter').value;
+                    const projectId = document.getElementById('projectFilter').value;
+                    let url = '/Lich/GetCongViecLich';
+                    let params = [];
+                    if (userId) params.push('userId=' + userId);
+                    if (projectId) params.push('projectId=' + projectId);
+                    if (params.length > 0) url += '?' + params.join('&');
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('calendar');
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            successCallback(data);
+                            updateStatistics(data);
+                        })
+                        .catch(error => {
+                            console.error('Lỗi khi tải dữ liệu:', error);
+                            failureCallback(error);
+                        });
+                },
+                eventDidMount: function(info) {
+                    // Tùy chỉnh màu sắc theo giai đoạn
+                    if (info.event.extendedProps.giaiDoan === "Sản xuất") {
+                        info.el.style.backgroundColor = "#0dcaf0";
+                        info.el.style.borderColor = "#0dcaf0";
+                        info.el.style.color = "#000";
+                    }
+                    if (info.event.extendedProps.giaiDoan === "Hậu kỳ") {
+                        info.el.style.backgroundColor = "#ffc107";
+                        info.el.style.borderColor = "#ffc107";
+                        info.el.style.color = "#000";
+                    }
 
-        // V6 dùng trực tiếp Calendar (đã có trong index.global.min.js)
-        var calendar = new Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,listWeek'
-            },
-            events: '/Lich/GetCongViecLich',
-            eventClick: function (info) {
-                const cv = info.event;
-                alert(
-                    `Công việc: ${cv.title}\nGiai đoạn: ${cv.extendedProps.giaiDoan}\nTrạng thái: ${cv.extendedProps.trangThai}`
-                );
-            },
-            editable: false
+                    // Thêm tooltip
+                    info.el.setAttribute('title',
+                        `${info.event.title}\n` +
+                        `Dự án: ${info.event.extendedProps.duAn}\n` +
+                        `Trạng thái: ${info.event.extendedProps.trangThai}`
+                    );
+                },
+                eventClick: function (info) {
+                    const cv = info.event;
+                    let trangThaiClass = getTrangThaiClass(cv.extendedProps.trangThai);
+                    let giaiDoanIcon = cv.extendedProps.giaiDoan === "Sản xuất" ? "bi-camera-video" : "bi-film";
+
+                    let html = `
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-2">
+                                    <i class="bi ${giaiDoanIcon} me-2"></i>${cv.title}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <small class="text-muted d-block">Giai đoạn</small>
+                                <span class="badge bg-${cv.extendedProps.giaiDoan === 'Sản xuất' ? 'info' : 'warning'} text-dark">
+                                    ${cv.extendedProps.giaiDoan}
+                                </span>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <small class="text-muted d-block">Trạng thái</small>
+                                <span class="badge bg-${trangThaiClass}">${cv.extendedProps.trangThai}</span>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <small class="text-muted d-block">Dự án</small>
+                                <strong class="text-dark">${cv.extendedProps.duAn}</strong>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <small class="text-muted d-block">Người thực hiện</small>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle me-2 text-primary"></i>
+                                    <strong class="text-dark">${cv.extendedProps.nguoiThucHien}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    let modal = document.getElementById('eventModal');
+                    modal.querySelector('.modal-body').innerHTML = html;
+                    let bsModal = new bootstrap.Modal(modal);
+                    bsModal.show();
+                },
+                editable: false,
+                eventConstraint: {
+                    start: '07:00',
+                    end: '22:00'
+                }
+            });
+
+            calendar.render();
+
+            // Lắng nghe sự kiện thay đổi bộ lọc
+            document.getElementById('userFilter').addEventListener('change', function () {
+                calendar.refetchEvents();
+            });
+            document.getElementById('projectFilter').addEventListener('change', function () {
+                calendar.refetchEvents();
+            });
         });
 
-        calendar.render();
-    });
-</script>
+        // Các hàm điều hướng calendar
+        function goToToday() {
+            if (calendar) calendar.today();
+        }
+
+        function goPrev() {
+            if (calendar) calendar.prev();
+        }
+
+        function goNext() {
+            if (calendar) calendar.next();
+        }
+
+        // Hàm cập nhật thống kê
+        function updateStatistics(events) {
+            let total = events.length;
+            let inProgress = events.filter(e => e.extendedProps.trangThai === 'Đang thực hiện').length;
+            let completed = events.filter(e => e.extendedProps.trangThai === 'Hoàn thành').length;
+            let overdue = events.filter(e => e.extendedProps.trangThai === 'Quá hạn').length;
+
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('inProgress').textContent = inProgress;
+            document.getElementById('completed').textContent = completed;
+            document.getElementById('overdue').textContent = overdue;
+        }
+
+        // Hàm lấy class CSS cho trạng thái
+        function getTrangThaiClass(trangThai) {
+            switch(trangThai) {
+                case 'Hoàn thành': return 'success';
+                case 'Đang thực hiện': return 'info';
+                case 'Chưa bắt đầu': return 'secondary';
+                case 'Quá hạn': return 'danger';
+                case 'Tạm dừng': return 'warning';
+                default: return 'secondary';
+            }
+        }
+    </script>
+
+    <!-- Modal chi tiết công việc -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="eventModalLabel">
+                        <i class="bi bi-info-circle me-2"></i>Chi tiết công việc
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Nội dung sẽ được điền bằng JavaScript -->
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

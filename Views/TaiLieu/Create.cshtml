@@ -2,56 +2,192 @@
     ViewData["Title"] = "Tạo tài liệu mới";
 }
 
-<h2>Tạo tài liệu mới</h2>
-
-<form asp-action="Create" method="post" enctype="multipart/form-data">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="form-group">
-        <label for="file" class="control-label">Chọn file</label>
-        <input type="file" name="file" class="form-control" />
-        <span class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="maDuAn" class="control-label">Dự án (tùy chọn)</label>
-        <select name="maDuAn" class="form-control" asp-items="ViewBag.DuAnList">
-            <option value="">-- Không gắn dự án --</option>
-        </select>
-        <span class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="maCongViec" class="control-label">Công việc (tùy chọn)</label>
-        <select name="maCongViec" class="form-control" asp-items="ViewBag.CongViecList">
-            <option value="">-- Không gắn công việc --</option>
-        </select>
-        <span class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label">Phân quyền truy cập</label>
-        <div id="phanQuyenContainer">
-            <div class="phan-quyen-row mb-2">
-                <select name="vaiTroIds" class="form-control d-inline-block w-50" asp-items="ViewBag.VaiTroList">
-                    <option value="">-- Chọn vai trò --</option>
-                </select>
-                <select name="quyenTruyCaps" class="form-control d-inline-block w-25">
-                    <option value="Xem">Xem</option>
-                    <option value="Tải">Tải</option>
-                    <option value="Sửa">Sửa</option>
-                    <option value="Xóa">Xóa</option>
-                </select>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="addPhanQuyenRow()">Thêm</button>
-            </div>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Tài liệu</a></li>
+                    <li class="breadcrumb-item active">Tạo mới</li>
+                </ol>
+            </nav>
+            <h2 class="h3 mb-0">
+                <i class="bi bi-file-earmark-plus me-2 text-primary"></i>Tạo tài liệu mới
+            </h2>
         </div>
     </div>
 
-    <div class="form-group">
-        <input type="submit" value="Tạo" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Create" method="post" enctype="multipart/form-data" class="card shadow-sm">
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Upload file -->
+                    <div class="mb-4">
+                        <label for="file" class="form-label required">
+                            <i class="bi bi-cloud-upload me-2"></i>Chọn file tài liệu
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-paperclip"></i>
+                            </span>
+                            <input type="file" name="file" id="file" class="form-control" required
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif" />
+                        </div>
+                        <div class="form-text">
+                            Hỗ trợ: PDF, Word, Excel, PowerPoint, Text, Hình ảnh (tối đa 50MB)
+                        </div>
+                        <span class="text-danger"></span>
+                    </div>
+
+                    <!-- Dự án -->
+                    <div class="mb-3">
+                        <label for="maDuAn" class="form-label required">
+                            <i class="bi bi-folder me-2"></i>Dự án
+                        </label>
+                        <select name="maDuAn" id="maDuAn" class="form-select" asp-items="ViewBag.DuAnList"
+                                required onchange="loadCongViec()">
+                            <option value="">-- Chọn dự án --</option>
+                        </select>
+                        <span class="text-danger"></span>
+                    </div>
+
+                    <!-- Công việc -->
+                    <div class="mb-3">
+                        <label for="maCongViec" class="form-label">
+                            <i class="bi bi-list-task me-2"></i>Công việc <span class="text-muted">(tùy chọn)</span>
+                        </label>
+                        <select name="maCongViec" id="maCongViec" class="form-select">
+                            <option value="">-- Không gắn công việc --</option>
+                        </select>
+                        <div class="form-text">
+                            Chọn công việc cụ thể nếu tài liệu liên quan đến một tác vụ nhất định
+                        </div>
+                        <span class="text-danger"></span>
+                    </div>
+
+                    <!-- Phân quyền -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-shield-lock me-2"></i>Phân quyền truy cập
+                        </label>
+                        <div class="alert alert-info py-2">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <small>Quản trị viên mặc định có tất cả quyền truy cập</small>
+                        </div>
+
+                        <div id="phanQuyenContainer" class="border rounded p-3 bg-light">
+                            <div class="phan-quyen-row mb-3">
+                                <div class="row align-items-center">
+                                    <div class="col-md-5">
+                                        <label class="form-label mb-1">Vai trò</label>
+                                        <select name="vaiTroIds[]" class="form-select" asp-items="ViewBag.VaiTroList">
+                                            <option value="">-- Chọn vai trò --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-1">Quyền truy cập</label>
+                                        <select name="quyenTruyCaps[]" class="form-select">
+                                            <option value="Xem">Chỉ xem</option>
+                                            <option value="Tải">Tải xuống</option>
+                                            <option value="Sửa">Chỉnh sửa</option>
+                                            <option value="Xóa">Xóa</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label mb-1 d-block">&nbsp;</label>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-success btn-sm"
+                                                    onclick="addPhanQuyenRow()" title="Thêm quyền">
+                                                <i class="bi bi-plus-circle"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    onclick="removePhanQuyenRow(this)" title="Xóa quyền">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Tạo tài liệu
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-lightbulb me-2 text-warning"></i>Hướng dẫn
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-primary">Quy trình tạo tài liệu:</h6>
+                    <ol class="mb-3">
+                        <li>Chọn file tài liệu cần upload</li>
+                        <li>Chọn dự án tương ứng</li>
+                        <li>Gắn công việc cụ thể (nếu có)</li>
+                        <li>Thiết lập quyền truy cập</li>
+                    </ol>
+
+                    <h6 class="text-primary">Phân quyền truy cập:</h6>
+                    <ul class="mb-3">
+                        <li><strong>Xem:</strong> Chỉ được xem nội dung</li>
+                        <li><strong>Tải:</strong> Có thể tải xuống</li>
+                        <li><strong>Sửa:</strong> Có thể chỉnh sửa</li>
+                        <li><strong>Xóa:</strong> Có thể xóa tài liệu</li>
+                    </ul>
+
+                    <div class="bg-light p-3 rounded">
+                        <h6 class="text-success mb-2">
+                            <i class="bi bi-check-circle me-2"></i>Lưu ý
+                        </h6>
+                        <small class="text-muted">
+                            Tài liệu sau khi tạo sẽ được lưu trữ an toàn và có thể truy cập theo phân quyền đã thiết lập.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thống kê nhanh -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-white">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-graph-up me-2 text-info"></i>Thống kê
+                    </h6>
+                </div>
+                <div class="card-body py-3">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <div class="h5 mb-0 text-primary">@ViewBag.TotalDocuments</div>
+                                <small class="text-muted">Tài liệu</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h5 mb-0 text-success">@ViewBag.TotalProjects</div>
+                            <small class="text-muted">Dự án</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</form>
+</div>
 
 @section Scripts {
     @{
@@ -61,9 +197,110 @@
         function addPhanQuyenRow() {
             var container = document.getElementById('phanQuyenContainer');
             var newRow = container.querySelector('.phan-quyen-row').cloneNode(true);
-            newRow.querySelector('select[name="vaiTroIds"]').value = '';
-            newRow.querySelector('select[name="quyenTruyCaps"]').value = 'Xem';
+
+            // Reset values
+            newRow.querySelector('select[name="vaiTroIds[]"]').value = '';
+            newRow.querySelector('select[name="quyenTruyCaps[]"]').value = 'Xem';
+
             container.appendChild(newRow);
         }
+
+        function removePhanQuyenRow(button) {
+            var container = document.getElementById('phanQuyenContainer');
+            var rows = container.querySelectorAll('.phan-quyen-row');
+
+            if (rows.length > 1) {
+                button.closest('.phan-quyen-row').remove();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Không thể xóa',
+                    text: 'Phải có ít nhất một quyền truy cập.',
+                    confirmButtonText: 'Đã hiểu'
+                });
+            }
+        }
+
+        function loadCongViec() {
+            var maDuAn = document.getElementById('maDuAn').value;
+            var congViecSelect = document.getElementById('maCongViec');
+
+            // Show loading
+            congViecSelect.innerHTML = '<option value="">Đang tải...</option>';
+            congViecSelect.disabled = true;
+
+            if (maDuAn) {
+                fetch(`/TaiLieu/GetCongViecByDuAn?maDuAn=${maDuAn}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        congViecSelect.innerHTML = '<option value="">-- Không gắn công việc --</option>';
+
+                        data.forEach(item => {
+                            var option = document.createElement('option');
+                            option.value = item.maCongViec;
+                            option.text = item.tenCongViec;
+                            congViecSelect.appendChild(option);
+                        });
+
+                        congViecSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading CongViec:', error);
+                        congViecSelect.innerHTML = '<option value="">-- Lỗi tải dữ liệu --</option>';
+                        congViecSelect.disabled = false;
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Không thể tải danh sách công việc. Vui lòng thử lại.',
+                            confirmButtonText: 'Đã hiểu'
+                        });
+                    });
+            } else {
+                congViecSelect.innerHTML = '<option value="">-- Không gắn công việc --</option>';
+                congViecSelect.disabled = false;
+            }
+        }
+
+        // File upload preview
+        document.getElementById('file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                const fileName = file.name;
+
+                if (file.size > 50 * 1024 * 1024) { // 50MB limit
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'File quá lớn',
+                        text: 'Kích thước file không được vượt quá 50MB.',
+                        confirmButtonText: 'Đã hiểu'
+                    });
+                    this.value = '';
+                    return;
+                }
+
+                // Show file info
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'alert alert-success mt-2';
+                fileInfo.innerHTML = `
+                    <i class="bi bi-file-check me-2"></i>
+                    <strong>${fileName}</strong> (${fileSize} MB)
+                `;
+
+                // Remove existing file info
+                const existingInfo = this.parentNode.parentNode.querySelector('.alert-success');
+                if (existingInfo) {
+                    existingInfo.remove();
+                }
+
+                this.parentNode.parentNode.appendChild(fileInfo);
+            }
+        });
     </script>
 }

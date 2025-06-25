@@ -13,6 +13,8 @@ public partial class CongViec
 
     public string? TrangThai { get; set; }
 
+    public DateOnly? NgayBatDau { get; set; }
+
     public DateOnly? Deadline { get; set; }
 
     public int MaDuAn { get; set; }

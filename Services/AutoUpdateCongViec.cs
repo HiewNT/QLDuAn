@@ -3,11 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 using QLDuAn.Models;
 using Microsoft.EntityFrameworkCore;
 
-public class ThongBaoBackgroundJob : BackgroundService
+public class AutoUpdateCongViec : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public ThongBaoBackgroundJob(IServiceProvider serviceProvider)
+    public AutoUpdateCongViec(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
@@ -32,6 +32,12 @@ public class ThongBaoBackgroundJob : BackgroundService
                     if (!cv.MaNguoiDung.HasValue) continue;
                     var deadline = cv.Deadline.Value.ToDateTime(TimeOnly.MinValue);
 
+                    // Nếu công việc đã quá hạn và chưa hoàn thành, chuyển trạng thái sang "Trễ hạn"
+                    if (deadline < now && cv.TrangThai != "Trễ hạn")
+                    {
+                        cv.TrangThai = "Trễ hạn";
+                    }
+
                     if (deadline <= now.AddDays(2) && deadline >= now)
                     {
                         var daCo = _context.ThongBaos.Any(tb =>
@@ -44,7 +50,7 @@ public class ThongBaoBackgroundJob : BackgroundService
                             _context.ThongBaos.Add(new ThongBao
                             {
                                 TieuDe = "Công việc sắp đến hạn",
-                                NoiDung = $"Công việc '{cv.TenCongViec}' của dự án {cv.MaDuAnNavigation.TenDuAn} sắp đến hạn!",
+                                NoiDung = $"Công việc '{cv.TenCongViec}' của dự án {cv.MaDuAnNavigation.TenDuAn} sắp đến hạn! Deadline:{cv.Deadline}",
                                 NgayTao = DateTime.Now,
                                 MaNguoiDung = cv.MaNguoiDung.Value,
                                 MaDuAn = cv.MaDuAn,

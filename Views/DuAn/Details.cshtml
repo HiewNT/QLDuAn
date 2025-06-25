@@ -4,7 +4,7 @@
 }
 
 <div class="container-fluid">
-    <div class="row mb-4">
+    <div class="row mb-3">
         <div class="col-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb bg-transparent p-0 mb-2">
@@ -33,54 +33,63 @@
     </div>
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-9">
             <!-- Thông tin chính -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">Thông tin dự án</h5>
                 </div>
-                <div class="card-body">
-                    <dl class="row mb-0">
+                <div class="card-body px-4 py-3">
+                    <dl class="row gy-3 align-items-center">
 
-                        <dt class="col-sm-3">Người phụ trách</dt>
-                        <dd class="col-sm-9">
-                            <span class="fs-6 badge bg-primary-subtle text-primary">
+                        <dt class="col-md-3 col-sm-4 fw-semibold">Người phụ trách:</dt>
+                        <dd class="col-md-9 col-sm-8 mb-2">
+                            <span class="badge bg-primary-subtle text-primary fs-6">
                                 <i class="bi bi-person me-1"></i>@Model.NguoiPhuTrachNavigation?.HoTen
                             </span>
                         </dd>
 
-                        <dt class="col-sm-3">Ngày bắt đầu</dt>
-                        <dd class="col-sm-9">@Model.NgayBatDau?.ToString("dd/MM/yyyy")</dd>
+                        <dt class="col-md-3 col-sm-4 fw-semibold">Ngày bắt đầu:</dt>
+                        <dd class="col-md-9 col-sm-8">@Model.NgayBatDau?.ToString("dd/MM/yyyy")</dd>
 
-                        <dt class="col-sm-3">Ngày kết thúc</dt>
-                        <dd class="col-sm-9">@Model.NgayKetThuc?.ToString("dd/MM/yyyy")</dd>
+                        <dt class="col-md-3 col-sm-4 fw-semibold">Ngày kết thúc:</dt>
+                        <dd class="col-md-9 col-sm-8">@Model.NgayKetThuc?.ToString("dd/MM/yyyy")</dd>
 
-                        <dt class="col-sm-3">Trạng thái</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-md-3 col-sm-4 fw-semibold">Trạng thái:</dt>
+                        <dd class="col-md-9 col-sm-8">
                             @switch (Model.TrangThai)
                             {
                                 case "Chuẩn bị":
-                                    <span class="fs-6 badge bg-secondary-subtle text-secondary">
+                                    <span class="badge bg-secondary-subtle text-secondary fs-6">
                                         <i class="bi bi-hourglass-split me-1"></i>Chuẩn bị
                                     </span>
                                     break;
                                 case "Đang thực hiện":
-                                    <span class="fs-6 badge bg-primary-subtle text-primary">
+                                    <span class="badge bg-primary-subtle text-primary fs-6">
                                         <i class="bi bi-arrow-repeat me-1"></i>Đang thực hiện
                                     </span>
                                     break;
                                 case "Hoàn thành":
-                                    <span class="fs-6 badge bg-success-subtle text-success">
+                                    <span class="badge bg-success-subtle text-success fs-6">
                                         <i class="bi bi-check-circle me-1"></i>Hoàn thành
                                     </span>
                                     break;
                             }
                         </dd>
 
-                        <dt class="col-sm-3">Mô tả</dt>
-                        <dd class="col-sm-9">@Model.MoTa</dd>
+                        <dt class="col-md-3 col-sm-4 fw-semibold">Mô tả:</dt>
+                        <dd class="col-md-9 col-sm-8">@Model.MoTa</dd>
+
+                        <dd class="offset-md-3 offset-sm-4 col-md-9 col-sm-8 mt-2">
+                            <a asp-controller="CongViec" asp-action="Create" asp-route-maDuAn="@Model.MaDuAn"
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-plus-circle me-1"></i>Thêm công việc
+                            </a>
+                        </dd>
+
                     </dl>
                 </div>
+
             </div>
 
             <!-- Danh sách công việc -->
@@ -104,7 +113,9 @@
                                 <thead class="bg-light">
                                     <tr>
                                         <th>Tên công việc</th>
+                                        <th>Tổ chuyên môn</th>
                                         <th>Người thực hiện</th>
+                                        <th>Ngày bắt đầu</th>
                                         <th>Deadline</th>
                                         <th class="text-center">Trạng thái</th>
                                     </tr>
@@ -114,7 +125,9 @@
                                     {
                                         <tr>
                                             <td>@cv.TenCongViec</td>
+                                            <td>@cv.MaToNavigation?.TenTo</td>
                                             <td>@cv.MaNguoiDungNavigation?.HoTen</td>
+                                            <td>@cv.NgayBatDau?.ToString("dd/MM/yyyy")</td>
                                             <td>@cv.Deadline?.ToString("dd/MM/yyyy")</td>
                                             <td class="text-center">
                                                 @switch (cv.TrangThai)

@@ -25,7 +25,7 @@
 
     <div class="row">
         <!-- Thông tin tổ và thành viên -->
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">Thông tin tổ chuyên môn</h5>
@@ -55,7 +55,6 @@
                                     <tr>
                                         <th>Họ tên</th>
                                         <th>Email</th>
-                                        <th>Vai trò</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -64,7 +63,6 @@
                                         <tr>
                                             <td>@nd.HoTen</td>
                                             <td>@nd.Email</td>
-                                            <td>@nd.MaVaiTroNavigation?.TenVaiTro</td>
                                         </tr>
                                     }
                                 </tbody>
@@ -80,7 +78,7 @@
         </div>
 
         <!-- Công việc tổ phụ trách -->
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
@@ -97,6 +95,7 @@
                                         <th>Tên công việc</th>
                                         <th>Giai đoạn</th>
                                         <th>Trạng thái</th>
+                                        <th>Ngày bắt đầu</th>
                                         <th>Deadline</th>
                                         <th>Người thực hiện</th>
                                     </tr>
@@ -127,6 +126,7 @@
                                                         break;
                                                 }
                                             </td>
+                                            <td>@(cv.NgayBatDau.HasValue? cv.Deadline.Value.ToString("dd/MM/yyyy") : "")</td>
                                             <td>@(cv.Deadline.HasValue? cv.Deadline.Value.ToString("dd/MM/yyyy") : "")</td>
                                             <td>@cv.MaNguoiDungNavigation?.HoTen</td>
                                         </tr>
