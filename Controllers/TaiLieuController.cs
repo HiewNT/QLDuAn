@@ -179,6 +179,18 @@ namespace QLDuAn.Controllers
         // GET: TaiLieu/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
+
+            // Kiểm tra phân quyền (bao gồm cả Admin)
+            var userVaiTro = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value); ; // Giả định người dùng đăng nhập
+            var hasPermission = await _context.PhanQuyenTaiLieus
+                .AnyAsync(p => p.MaTaiLieu == id && p.MaVaiTro == userVaiTro && p.QuyenTruyCap == "Sửa");
+
+            if (!hasPermission)
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền sửa tài liệu này.";
+                return RedirectToAction("Index", "TaiLieu");
+            }
+
             var taiLieu = await _context.TaiLieus
                 .Include(t => t.PhanQuyenTaiLieus)
                 .ThenInclude(p => p.MaVaiTroNavigation)
@@ -289,14 +301,16 @@ namespace QLDuAn.Controllers
             }
 
             // Kiểm tra phân quyền (bao gồm cả Admin)
-            var userVaiTro = 1; // Giả định người dùng đăng nhập
+            var userVaiTro = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value); ; // Giả định người dùng đăng nhập
             var hasPermission = await _context.PhanQuyenTaiLieus
                 .AnyAsync(p => p.MaTaiLieu == id && p.MaVaiTro == userVaiTro && p.QuyenTruyCap == "Tải");
 
             if (!hasPermission)
             {
-                return Forbid("Bạn không có quyền tải tài liệu này.");
+                TempData["ErrorMessage"] = "Bạn không có quyền tải tài liệu này.";
+                return RedirectToAction("Index", "TaiLieu");
             }
+
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", taiLieu.FilePath.TrimStart('/'));
             if (!System.IO.File.Exists(filePath))
@@ -345,6 +359,18 @@ namespace QLDuAn.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+
+            // Kiểm tra phân quyền (bao gồm cả Admin)
+            var userVaiTro = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value); ; // Giả định người dùng đăng nhập
+            var hasPermission = await _context.PhanQuyenTaiLieus
+                .AnyAsync(p => p.MaTaiLieu == id && p.MaVaiTro == userVaiTro && p.QuyenTruyCap == "Xóa");
+
+            if (!hasPermission)
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền sửa tài liệu này.";
+                return RedirectToAction("Index", "TaiLieu");
+            }
+
             var taiLieu = await _context.TaiLieus.FindAsync(id);
             if (taiLieu != null)
             {
